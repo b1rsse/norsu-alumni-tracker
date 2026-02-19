@@ -3,98 +3,119 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1>{{ title }}</h1>
-
-    {{ form_start(form) }}
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    {{ form_label(form.studentId) }}
-                    {{ form_widget(form.studentId, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.studentId) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.firstName) }}
-                    {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.firstName) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.lastName) }}
-                    {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.lastName) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.email) }}
-                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.email) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.phone) }}
-                    {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.phone) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.course) }}
-                    {{ form_widget(form.course, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.course) }}
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="mb-3">
-                    {{ form_label(form.batchYear) }}
-                    {{ form_widget(form.batchYear, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.batchYear) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.currentEmploymentStatus) }}
-                    {{ form_widget(form.currentEmploymentStatus, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.currentEmploymentStatus) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.current_position) }}
-                    {{ form_widget(form.current_position, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.current_position) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.company_name) }}
-                    {{ form_widget(form.company_name, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.company_name) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.salary_range) }}
-                    {{ form_widget(form.salary_range, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.salary_range) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.location) }}
-                    {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.location) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.skills) }}
-                    {{ form_widget(form.skills, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(form.skills) }}
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="{{ path('alumni_index') }}" class="btn btn-secondary">Cancel</a>
-        </div>
-    {{ form_end(form) }}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0">{{ title }}</h4>
+    <a href="{{ path('alumni_index') }}" class="btn btn-outline-norsu"><i class="bi bi-arrow-left me-1"></i>Back</a>
 </div>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+{# ── Tabs ── #}
+<ul class="nav nav-tabs mb-3" id="alumniTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-personal"><i class="bi bi-person me-1"></i>Personal</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-academic"><i class="bi bi-mortarboard me-1"></i>Academic</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-employment"><i class="bi bi-briefcase me-1"></i>Employment</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-career"><i class="bi bi-graph-up me-1"></i>Career</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-feedback"><i class="bi bi-chat-dots me-1"></i>Feedback</a></li>
+</ul>
+
+<div class="tab-content">
+    {# ── Personal Information ── #}
+    <div class="tab-pane fade show active" id="tab-personal">
+        <div class="card"><div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">{{ form_row(form.studentNumber) }}</div>
+                <div class="col-md-4">{{ form_row(form.firstName) }}</div>
+                <div class="col-md-4">{{ form_row(form.middleName) }}</div>
+                <div class="col-md-4">{{ form_row(form.lastName) }}</div>
+                <div class="col-md-4">{{ form_row(form.suffix) }}</div>
+                <div class="col-md-4">{{ form_row(form.sex) }}</div>
+                <div class="col-md-4">{{ form_row(form.dateOfBirth) }}</div>
+                <div class="col-md-4">{{ form_row(form.civilStatus) }}</div>
+                <div class="col-md-4">{{ form_row(form.contactNumber) }}</div>
+                <div class="col-md-6">{{ form_row(form.emailAddress) }}</div>
+                <div class="col-md-6">{{ form_row(form.province) }}</div>
+                <div class="col-12">{{ form_row(form.homeAddress) }}</div>
+            </div>
+        </div></div>
+    </div>
+
+    {# ── Academic Information ── #}
+    <div class="tab-pane fade" id="tab-academic">
+        <div class="card"><div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">{{ form_row(form.course) }}</div>
+                <div class="col-md-4">{{ form_row(form.college) }}</div>
+                <div class="col-md-4">{{ form_row(form.yearGraduated) }}</div>
+                <div class="col-md-4">{{ form_row(form.degreeProgram) }}</div>
+                <div class="col-md-4">{{ form_row(form.major) }}</div>
+                <div class="col-md-4">{{ form_row(form.dateGraduated) }}</div>
+                <div class="col-md-4">{{ form_row(form.latinHonor) }}</div>
+                <div class="col-md-4">{{ form_row(form.gwa) }}</div>
+                <div class="col-md-4">{{ form_row(form.honorsReceived) }}</div>
+                <div class="col-md-6">{{ form_row(form.scholarshipGranted) }}</div>
+            </div>
+        </div></div>
+    </div>
+
+    {# ── Employment Information ── #}
+    <div class="tab-pane fade" id="tab-employment">
+        <div class="card"><div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">{{ form_row(form.employmentStatus) }}</div>
+                <div class="col-md-4">{{ form_row(form.employmentType) }}</div>
+                <div class="col-md-4">{{ form_row(form.jobLevel) }}</div>
+                <div class="col-md-6">{{ form_row(form.companyName) }}</div>
+                <div class="col-md-6">{{ form_row(form.jobTitle) }}</div>
+                <div class="col-md-6">{{ form_row(form.industry) }}</div>
+                <div class="col-md-6">{{ form_row(form.monthlySalary) }}</div>
+                <div class="col-12">{{ form_row(form.companyAddress) }}</div>
+                <div class="col-md-4">{{ form_row(form.dateHired) }}</div>
+                <div class="col-md-4">{{ form_row(form.yearsInCompany) }}</div>
+                <div class="col-md-4">{{ form_row(form.countryOfEmployment) }}</div>
+                <div class="col-md-4"><div class="form-check mt-4">{{ form_row(form.isFirstJob) }}</div></div>
+                <div class="col-md-4"><div class="form-check mt-4">{{ form_row(form.workAbroad) }}</div></div>
+            </div>
+        </div></div>
+    </div>
+
+    {# ── Career Tracking ── #}
+    <div class="tab-pane fade" id="tab-career">
+        <div class="card"><div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="form-check mt-2">{{ form_row(form.jobRelatedToCourse) }}</div></div>
+                <div class="col-md-4"><div class="form-check mt-2">{{ form_row(form.promotionReceived) }}</div></div>
+                <div class="col-md-4">{{ form_row(form.datePromoted) }}</div>
+                <div class="col-md-6">{{ form_row(form.skillsUsedInJob) }}</div>
+                <div class="col-md-6">{{ form_row(form.trainingsAttended) }}</div>
+                <div class="col-md-6">{{ form_row(form.licensesObtained) }}</div>
+                <div class="col-md-6">{{ form_row(form.certifications) }}</div>
+                <div class="col-12">{{ form_row(form.careerAchievements) }}</div>
+            </div>
+        </div></div>
+    </div>
+
+    {# ── Feedback & University Contribution ── #}
+    <div class="tab-pane fade" id="tab-feedback">
+        <div class="card"><div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="form-check mt-2">{{ form_row(form.furtherStudies) }}</div></div>
+                <div class="col-md-4">{{ form_row(form.postgraduateDegree) }}</div>
+                <div class="col-md-4">{{ form_row(form.schoolForFurtherStudies) }}</div>
+                <div class="col-12">{{ form_row(form.suggestionsForUniversity) }}</div>
+                <div class="col-md-3"><div class="form-check mt-2">{{ form_row(form.recommendNorsu) }}</div></div>
+                <div class="col-md-3"><div class="form-check mt-2">{{ form_row(form.willingForSeminar) }}</div></div>
+                <div class="col-md-3"><div class="form-check mt-2">{{ form_row(form.willingForDonation) }}</div></div>
+                <div class="col-md-3"><div class="form-check mt-2">{{ form_row(form.willingForMentorship) }}</div></div>
+            </div>
+        </div></div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <button type="submit" class="btn btn-norsu"><i class="bi bi-check-lg me-1"></i>Save Alumni Record</button>
+    <a href="{{ path('alumni_index') }}" class="btn btn-outline-secondary">Cancel</a>
+</div>
+
+{{ form_end(form) }}
 {% endblock %}

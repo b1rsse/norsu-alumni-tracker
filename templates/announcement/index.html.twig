@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Announcements{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-megaphone-fill me-2"></i>Announcements</h4>
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('announcement_create') }}" class="btn btn-norsu"><i class="bi bi-plus-lg me-1"></i>New Announcement</a>
+    {% endif %}
+</div>
+
+{% if announcements|length == 0 %}
+    <div class="card"><div class="card-body text-center text-muted py-5">
+        <i class="bi bi-megaphone fs-1 d-block mb-2 opacity-25"></i>
+        No announcements yet.
+    </div></div>
+{% else %}
+    <div class="row g-3">
+        {% for a in announcements %}
+        <div class="col-md-6">
+            <div class="card h-100 {{ not a.isActive ? 'opacity-50' : '' }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            {% if a.category %}
+                                <span class="badge bg-light text-dark me-1">{{ a.category }}</span>
+                            {% endif %}
+                            {% if not a.isActive %}
+                                <span class="badge bg-secondary">Draft</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">{{ a.datePosted|date('M d, Y') }}</small>
+                    </div>
+                    <h5 class="card-title fw-bold">{{ a.title }}</h5>
+                    <p class="card-text text-muted small">{{ a.description|length > 200 ? a.description|slice(0,200) ~ '…' : a.description }}</p>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        {% if a.postedBy %}By {{ a.postedBy.fullName }}{% endif %}
+                    </small>
+                    <div>
+                        <a href="{{ path('announcement_show', {id: a.id}) }}" class="btn btn-sm btn-outline-norsu">View</a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('announcement_edit', {id: a.id}) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                            <form method="post" action="{{ path('announcement_delete', {id: a.id}) }}" class="d-inline"
+                                  onsubmit="return confirm('Delete this announcement?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ a.id) }}">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

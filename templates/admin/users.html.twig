@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Manage Users</h4>
+    {% if pendingCount > 0 %}
+        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-hourglass-split me-1"></i>{{ pendingCount }} pending</span>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th>Last Login</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="{{ user.accountStatus == 'pending' ? 'table-warning' : '' }}">
+                        <td class="ps-3 fw-semibold">{{ user.fullName }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% else %}
+                                <span class="badge bg-primary">Alumni</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.accountStatus == 'active' %}
+                                <span class="badge badge-employed">Active</span>
+                            {% elseif user.accountStatus == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ user.dateRegistered|date('M d, Y') }}</td>
+                        <td class="small">{{ user.lastLogin ? user.lastLogin|date('M d, Y H:i') : '—' }}</td>
+                        <td class="text-end pe-3">
+                            <div class="btn-group btn-group-sm">
+                                {% if user.accountStatus == 'pending' %}
+                                <form method="post" action="{{ path('admin_user_approve', {id: user.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ user.id) }}">
+                                    <button class="btn btn-success btn-sm" title="Approve"><i class="bi bi-check-lg"></i></button>
+                                </form>
+                                {% endif %}
+
+                                <form method="post" action="{{ path('admin_user_toggle_status', {id: user.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                                    <button class="btn btn-outline-secondary btn-sm" title="Toggle Active/Inactive">
+                                        <i class="bi {{ user.accountStatus == 'active' ? 'bi-pause-circle' : 'bi-play-circle' }}"></i>
+                                    </button>
+                                </form>
+
+                                <form method="post" action="{{ path('admin_user_toggle_admin', {id: user.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin' ~ user.id) }}">
+                                    <button class="btn btn-outline-warning btn-sm" title="Toggle Admin">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </button>
+                                </form>
+
+                                {% if user != app.user %}
+                                <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" class="d-inline"
+                                      onsubmit="return confirm('Delete this user?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button class="btn btn-outline-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

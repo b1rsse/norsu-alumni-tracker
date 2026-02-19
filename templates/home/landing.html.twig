@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}NORSU Alumni Tracker — Welcome{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="container text-center">
+        <div class="mb-3">
+            <span style="background:rgba(255,255,255,0.15);border-radius:50%;padding:0.5rem;display:inline-flex;align-items:center;justify-content:center">
+                <img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU Logo" style="width:60px;height:60px;border-radius:50%;object-fit:cover">
+            </span>
+        </div>
+        <h1 style="font-weight:800;font-size:2.75rem">NORSU Alumni Tracker</h1>
+        <p class="lead mb-4" style="max-width:600px;margin:0 auto">Connecting Negros Oriental State University graduates — track careers, build networks, and stay in touch.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+            <a href="{{ path('app_register') }}" class="btn btn-light btn-lg fw-semibold px-4"><i class="bi bi-person-plus me-2"></i>Get Started</a>
+            <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-lg fw-semibold px-4"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">What We Offer</h3>
+        <p class="text-muted">Empowering NORSU through alumni engagement and data-driven insights</p>
+    </div>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #1E40AF !important">
+                <div class="mb-3"><i class="bi bi-people-fill" style="font-size:3rem;color:#1E40AF"></i></div>
+                <h5 class="fw-bold">Alumni Directory</h5>
+                <p class="text-muted mb-0">Browse and search through our comprehensive database of NORSU graduates across all courses and batch years.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #059669 !important">
+                <div class="mb-3"><i class="bi bi-briefcase-fill" style="font-size:3rem;color:#059669"></i></div>
+                <h5 class="fw-bold">Career Tracking</h5>
+                <p class="text-muted mb-0">Monitor employment status, work history, and career progression of alumni to gain valuable insights.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #06B6D4 !important">
+                <div class="mb-3"><i class="bi bi-graph-up-arrow" style="font-size:3rem;color:#06B6D4"></i></div>
+                <h5 class="fw-bold">Data Insights</h5>
+                <p class="text-muted mb-0">Analyze trends in employment, skills, and salary ranges to help the university improve its programs.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer-norsu">
+    <div class="container">
+        <div class="d-md-flex justify-content-between align-items-center text-center text-md-start">
+            <div>
+                <div class="footer-brand"><img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle" class="me-2">NORSU Alumni Tracker</div>
+                <p class="mb-0 small">Negros Oriental State University, Dumaguete City</p>
+            </div>
+            <div class="footer-social mt-3 mt-md-0">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                <a href="#"><i class="bi bi-globe2"></i></a>
+            </div>
+        </div>
+        <div class="footer-divider"></div>
+        <p class="text-center mb-0" style="font-size:0.8rem">&copy; {{ 'now'|date('Y') }} NORSU Alumni Tracker. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}

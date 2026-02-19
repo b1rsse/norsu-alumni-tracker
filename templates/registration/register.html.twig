@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body_class %}no-navbar{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="card auth-card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU" class="auth-logo mb-2">
+                    <h2 class="card-title mb-1">Create Account</h2>
+                    <p class="card-subtitle">Join the NORSU alumni community</p>
+                </div>
+
+                {{ form_start(registrationForm) }}
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <div class="auth-input-icon">
+                                <i class="bi bi-person"></i>
+                                {{ form_widget(registrationForm.firstName, {'attr': {'placeholder': 'First name'}}) }}
+                            </div>
+                            {{ form_errors(registrationForm.firstName) }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <div class="auth-input-icon">
+                                <i class="bi bi-person"></i>
+                                {{ form_widget(registrationForm.lastName, {'attr': {'placeholder': 'Last name'}}) }}
+                            </div>
+                            {{ form_errors(registrationForm.lastName) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <div class="auth-input-icon">
+                            <i class="bi bi-envelope"></i>
+                            {{ form_widget(registrationForm.email, {'attr': {'placeholder': 'you@example.com'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Password</label>
+                        <div class="auth-input-icon">
+                            <i class="bi bi-lock"></i>
+                            {{ form_widget(registrationForm.plainPassword.first, {'attr': {'placeholder': 'Create a password'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.plainPassword.first) }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Confirm Password</label>
+                        <div class="auth-input-icon">
+                            <i class="bi bi-shield-lock"></i>
+                            {{ form_widget(registrationForm.plainPassword.second, {'attr': {'placeholder': 'Confirm your password'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.plainPassword) }}
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-norsu btn-lg">
+                            <i class="bi bi-person-plus me-1"></i>Create Account
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="mb-0 text-muted" style="font-size:0.9rem">Already have an account? <a href="{{ path('app_login') }}" class="auth-link">Log in here</a></p>
+                    </div>
+                {{ form_end(registrationForm) }}
+            </div>
+        </div>
+
+        <div class="auth-footer mt-3">
+            <p class="mb-0">&copy; {{ 'now'|date('Y') }} Negros Oriental State University</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

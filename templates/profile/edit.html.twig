@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Profile</h4>
+    <a href="{{ path('app_profile') }}" class="btn btn-outline-norsu"><i class="bi bi-arrow-left me-1"></i>Back to Profile</a>
+</div>
+
+<div class="row g-4">
+    {# ── Edit Personal Info ── #}
+    <div class="col-md-8">
+        <form method="post" action="{{ path('app_profile_edit') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('profile_edit') }}">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold"><i class="bi bi-person me-1"></i> Personal Information</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="firstName" class="form-control" value="{{ user.firstName }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="lastName" class="form-control" value="{{ user.lastName }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-white fw-semibold"><i class="bi bi-lock me-1"></i> Change Password <small class="text-muted fw-normal">(optional)</small></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">New Password</label>
+                            <input type="password" name="newPassword" class="form-control" placeholder="Leave blank to keep current" minlength="6">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Password</label>
+                            <input type="password" name="confirmPassword" class="form-control" placeholder="Re-enter new password">
+                        </div>
+                    </div>
+                    <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>Minimum 6 characters. Leave blank if you don't want to change your password.</div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-norsu"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+                <a href="{{ path('app_profile') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    {# ── Side Info ── #}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-4">
+                <div class="mx-auto mb-3" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--norsu-blue),var(--norsu-green));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff">
+                    {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                </div>
+                <h5 class="fw-bold mb-1">{{ user.fullName }}</h5>
+                <p class="text-muted small mb-2">{{ user.email }}</p>
+                {% if 'ROLE_ADMIN' in user.roles %}
+                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i>Administrator</span>
+                {% else %}
+                    <span class="badge bg-primary"><i class="bi bi-person me-1"></i>User</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h6 class="fw-semibold mb-3"><i class="bi bi-lightbulb me-1"></i> Tips</h6>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i> Use a strong, unique password</li>
+                    <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i> Keep your email address up to date</li>
+                    <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i> Never share your login credentials</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

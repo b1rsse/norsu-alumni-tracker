@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Alumni Feedback{% endblock %}
+
+{% block body %}
+<h4 class="fw-bold mb-3"><i class="bi bi-chat-square-text-fill me-2"></i>Alumni Feedback</h4>
+
+{% if feedbacks|length == 0 %}
+    <div class="card"><div class="card-body text-center text-muted py-5">
+        <i class="bi bi-chat-dots fs-1 d-block mb-2 opacity-25"></i>
+        No feedback submissions yet.
+    </div></div>
+{% else %}
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Alumni</th>
+                            <th>Suggestions</th>
+                            <th>Recommend?</th>
+                            <th>Date</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in feedbacks %}
+                        <tr>
+                            <td class="ps-3 fw-semibold">{{ f.alumni ? f.alumni.fullName : 'Anonymous' }}</td>
+                            <td class="small">{{ f.suggestions|length > 100 ? f.suggestions|slice(0,100) ~ '…' : f.suggestions ?? '—' }}</td>
+                            <td>
+                                {% if f.recommendUniversity %}
+                                    <span class="badge badge-employed">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ f.dateSubmitted|date('M d, Y') }}</td>
+                            <td class="text-end pe-3">
+                                <a href="{{ path('feedback_show', {id: f.id}) }}" class="btn btn-sm btn-outline-norsu"><i class="bi bi-eye"></i></a>
+                                <form method="post" action="{{ path('feedback_delete', {id: f.id}) }}" class="d-inline"
+                                      onsubmit="return confirm('Delete feedback?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ f.id) }}">
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
