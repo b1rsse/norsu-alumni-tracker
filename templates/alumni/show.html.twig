@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ alumni.firstName }} {{ alumni.lastName }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ alumni.firstName }} {{ alumni.lastName }}</h1>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Student ID:</strong> {{ alumni.studentId }}</p>
+                    <p><strong>Email:</strong> {{ alumni.email }}</p>
+                    <p><strong>Phone:</strong> {{ alumni.phone ?? 'N/A' }}</p>
+                    <p><strong>Course:</strong> {{ alumni.course }}</p>
+                    <p><strong>Batch Year:</strong> {{ alumni.batchYear }}</p>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Employment Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Employment Status:</strong> {{ alumni.currentEmploymentStatus ?? 'N/A' }}</p>
+                    <p><strong>Job Title/Position:</strong> {{ alumni.current_position ?? 'N/A' }}</p>
+                    <p><strong>Company/Employer:</strong> {{ alumni.company_name ?? 'N/A' }}</p>
+                    <p><strong>Salary Range:</strong> {{ alumni.salary_range ?? 'N/A' }}</p>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Additional Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Location/Region:</strong> {{ alumni.location ?? 'N/A' }}</p>
+                    <p><strong>Skills:</strong> {{ alumni.skills ?? 'N/A' }}</p>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Work History</h5>
+                </div>
+                <div class="card-body">
+                    {% if alumni.workHistories is not empty %}
+                        {% for work in alumni.workHistories %}
+                            <div class="mb-3">
+                                <h6>{{ work.companyName }}</h6>
+                                <p class="mb-1">
+                                    <strong>Position:</strong> {{ work.position }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Duration:</strong> {{ work.startDate|date('Y-m-d') }} to
+                                    {% if work.endDate %}{{ work.endDate|date('Y-m-d') }}{% else %}Present{% endif %}
+                                </p>
+                                <p class="text-muted">{{ work.description }}</p>
+                            </div>
+                            {% if not loop.last %}<hr>{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No work history recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ path('alumni_edit', {'id': alumni.id}) }}" class="btn btn-primary">Edit</a>
+                <a href="{{ path('alumni_index') }}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
