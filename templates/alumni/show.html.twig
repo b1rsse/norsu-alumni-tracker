@@ -1,214 +1,273 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ alumni.fullName }}{% endblock %}
+{% block title %}{{ alumni.fullName }} — Alumni Profile{% endblock %}
 
 {% block body %}
-{# ── Header ── #}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-    <div>
-        <h4 class="fw-bold mb-1">{{ alumni.fullName }}</h4>
-        <span class="text-muted">{{ alumni.studentNumber }} &middot; {{ alumni.course }} {{ alumni.yearGraduated ? '(' ~ alumni.yearGraduated ~ ')' : '' }}</span>
-    </div>
-    <div class="mt-2 mt-md-0 d-flex gap-2">
-        <a href="{{ path('alumni_edit', {id: alumni.id}) }}" class="btn btn-norsu"><i class="bi bi-pencil me-1"></i>Edit</a>
-        <a href="{{ path('alumni_index') }}" class="btn btn-outline-norsu"><i class="bi bi-arrow-left me-1"></i>Back</a>
-    </div>
+<div class="flex justify-between items-center mb-3">
+    <a href="{{ path('alumni_index') }}" class="btn-outline-norsu btn-sm"><i class="bi bi-arrow-left mr-1"></i>Back to Directory</a>
+    {% if is_granted('ROLE_STAFF') %}
+        <div class="flex gap-1">
+            <a href="{{ path('alumni_edit', {id: alumni.id}) }}" class="btn-warning btn-sm"><i class="bi bi-pencil mr-1"></i>Edit</a>
+            <a href="{{ path('document_upload', {alumniId: alumni.id}) }}" class="btn-outline-norsu btn-sm"><i class="bi bi-cloud-arrow-up mr-1"></i>Upload Doc</a>
+        </div>
+    {% endif %}
 </div>
 
-<div class="row g-4">
-    {# ── LEFT COLUMN ── #}
-    <div class="col-lg-4">
-        {# Profile Card #}
-        <div class="card mb-4">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    {# Left column — Profile card #}
+    <div class="lg:col-span-4">
+        <div class="card">
             <div class="card-body text-center">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                     style="width:80px;height:80px;background:#D1FAE5;font-size:2rem;color:#059669;font-weight:700;">
-                    {{ alumni.firstName|first }}{{ alumni.lastName|first }}
+                <div class="w-24 h-24 rounded-full bg-norsu text-white flex items-center justify-center text-3xl font-bold mx-auto mb-3">
+                    {{ alumni.firstName|first|upper }}{{ alumni.lastName|first|upper }}
                 </div>
-                <h5 class="fw-bold mb-1">{{ alumni.fullName }}</h5>
-                <p class="text-muted small mb-2">{{ alumni.emailAddress }}</p>
-                {% if alumni.employmentStatus %}
-                    {% if alumni.employmentStatus == 'Employed' %}
-                        <span class="badge badge-employed">{{ alumni.employmentStatus }}</span>
-                    {% elseif alumni.employmentStatus == 'Self-Employed' %}
-                        <span class="badge badge-self-employed">{{ alumni.employmentStatus }}</span>
-                    {% elseif alumni.employmentStatus == 'Unemployed' %}
-                        <span class="badge badge-unemployed">{{ alumni.employmentStatus }}</span>
-                    {% else %}
-                        <span class="badge bg-secondary">{{ alumni.employmentStatus }}</span>
-                    {% endif %}
+                <h5 class="font-bold mb-0">{{ alumni.fullName }}</h5>
+                <p class="text-gray-500 text-sm">{{ alumni.course ?? 'N/A' }} — {{ alumni.yearGraduated ?? 'N/A' }}</p>
+                {% set statusMap = {
+                    'Employed': 'badge-employed',
+                    'Unemployed': 'badge-unemployed',
+                    'Self-Employed': 'badge-self-employed',
+                    'self-employed': 'badge-self-employed',
+                    'Freelance': 'badge-freelance',
+                    'freelance': 'badge-freelance'
+                } %}
+                <span class="badge {{ statusMap[alumni.employmentStatus] ?? 'badge-secondary' }}">
+                    {{ alumni.employmentStatus ?? 'Unknown' }}
+                </span>
+            </div>
+            <div class="divide-y divide-gray-100 text-sm">
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Student No</span>
+                    <span class="font-mono font-semibold">{{ alumni.studentNumber }}</span>
+                </div>
+                {% if alumni.sex %}
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Sex</span>
+                    <span>{{ alumni.sex }}</span>
+                </div>
+                {% endif %}
+                {% if alumni.civilStatus %}
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Civil Status</span>
+                    <span>{{ alumni.civilStatus }}</span>
+                </div>
+                {% endif %}
+                {% if alumni.dateOfBirth %}
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Date of Birth</span>
+                    <span>{{ alumni.dateOfBirth|date('M d, Y') }}</span>
+                </div>
+                {% endif %}
+                {% if alumni.contactNumber %}
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Contact</span>
+                    <span>{{ alumni.contactNumber }}</span>
+                </div>
+                {% endif %}
+                {% if alumni.emailAddress %}
+                <div class="px-4 py-2 flex justify-between">
+                    <span class="text-gray-500">Email</span>
+                    <span>{{ alumni.emailAddress }}</span>
+                </div>
                 {% endif %}
             </div>
-            <ul class="list-group list-group-flush small">
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Sex</span><span>{{ alumni.sex ?? '—' }}</span></li>
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Date of Birth</span><span>{{ alumni.dateOfBirth ? alumni.dateOfBirth|date('M d, Y') : '—' }}</span></li>
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Civil Status</span><span>{{ alumni.civilStatus ?? '—' }}</span></li>
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Contact</span><span>{{ alumni.contactNumber ?? '—' }}</span></li>
-                <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Province</span><span>{{ alumni.province ?? '—' }}</span></li>
-            </ul>
-        </div>
-
-        {# Address #}
-        {% if alumni.homeAddress %}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-geo-alt me-1"></i> Address</div>
-            <div class="card-body small">{{ alumni.homeAddress }}</div>
-        </div>
-        {% endif %}
-
-        {# University Contribution #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-heart me-1"></i> Willingness</div>
-            <div class="card-body small">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi {{ alumni.recommendNorsu ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted' }} me-2"></i>
-                    Recommend NORSU
+            {% if alumni.homeAddress or alumni.province %}
+            <div class="px-4 py-3 border-t border-gray-200 text-sm">
+                <span class="text-gray-500 block mb-1">Address</span>
+                <div>{{ alumni.homeAddress }}{% if alumni.province %}<br>{{ alumni.province }}{% endif %}</div>
+            </div>
+            {% endif %}
+            {# Willingness indicators #}
+            <div class="px-4 py-3 border-t border-gray-200 text-sm space-y-1">
+                <div class="flex items-center gap-2">
+                    <i class="bi {{ alumni.willingForSeminar ? 'bi-check-circle-fill text-green-500' : 'bi-x-circle-fill text-gray-300' }}"></i>
+                    <span>Willing to participate in seminars</span>
                 </div>
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi {{ alumni.willingForSeminar ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted' }} me-2"></i>
-                    Guest Speaker / Seminar
+                <div class="flex items-center gap-2">
+                    <i class="bi {{ alumni.willingForDonation ? 'bi-check-circle-fill text-green-500' : 'bi-x-circle-fill text-gray-300' }}"></i>
+                    <span>Willing to donate</span>
                 </div>
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi {{ alumni.willingForDonation ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted' }} me-2"></i>
-                    Donation
+                <div class="flex items-center gap-2">
+                    <i class="bi {{ alumni.willingForMentorship ? 'bi-check-circle-fill text-green-500' : 'bi-x-circle-fill text-gray-300' }}"></i>
+                    <span>Willing to mentor</span>
                 </div>
-                <div class="d-flex align-items-center">
-                    <i class="bi {{ alumni.willingForMentorship ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted' }} me-2"></i>
-                    Mentorship
+                <div class="flex items-center gap-2">
+                    <i class="bi {{ alumni.recommendNorsu ? 'bi-check-circle-fill text-green-500' : 'bi-x-circle-fill text-gray-300' }}"></i>
+                    <span>Recommends NORSU</span>
                 </div>
             </div>
         </div>
     </div>
 
-    {# ── RIGHT COLUMN ── #}
-    <div class="col-lg-8">
-        {# Academic #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-mortarboard me-1"></i> Academic Information</div>
+    {# Right column — Details #}
+    <div class="lg:col-span-8 space-y-4">
+        {# Academic Info #}
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-mortarboard mr-1"></i> Academic Information</div>
             <div class="card-body">
-                <div class="row g-3 small">
-                    <div class="col-sm-6"><span class="text-muted d-block">Course</span><strong>{{ alumni.course }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">College</span><strong>{{ alumni.college ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Degree Program</span><strong>{{ alumni.degreeProgram ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Major</span><strong>{{ alumni.major ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Year Graduated</span><strong>{{ alumni.yearGraduated ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Date Graduated</span><strong>{{ alumni.dateGraduated ? alumni.dateGraduated|date('M d, Y') : '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">GWA</span><strong>{{ alumni.gwa ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Latin Honor</span><strong>{{ alumni.latinHonor ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Honors Received</span><strong>{{ alumni.honorsReceived ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Scholarship</span><strong>{{ alumni.scholarshipGranted ?? '—' }}</strong></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div>
+                        <span class="text-gray-500 block text-xs">Course</span>
+                        <strong>{{ alumni.course ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Year Graduated</span>
+                        <strong>{{ alumni.yearGraduated ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Honors</span>
+                        <strong>{{ alumni.honorsReceived ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Further Studies</span>
+                        <strong>{{ alumni.furtherStudies is not null ? (alumni.furtherStudies ? 'Yes' : 'No') : '—' }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {# Employment #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-briefcase me-1"></i> Employment Information</div>
+        {# Employment Info #}
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-briefcase mr-1"></i> Employment Information</div>
             <div class="card-body">
-                <div class="row g-3 small">
-                    <div class="col-sm-4"><span class="text-muted d-block">Employment Status</span><strong>{{ alumni.employmentStatus ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Employment Type</span><strong>{{ alumni.employmentType ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Job Level</span><strong>{{ alumni.jobLevel ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Company</span><strong>{{ alumni.companyName ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Job Title</span><strong>{{ alumni.jobTitle ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Industry</span><strong>{{ alumni.industry ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Company Address</span><strong>{{ alumni.companyAddress ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Date Hired</span><strong>{{ alumni.dateHired ? alumni.dateHired|date('M d, Y') : '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Monthly Salary</span><strong>{{ alumni.monthlySalary ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Years in Company</span><strong>{{ alumni.yearsInCompany ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">First Job?</span><strong>{{ alumni.isFirstJob is null ? '—' : (alumni.isFirstJob ? 'Yes' : 'No') }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Works Abroad?</span><strong>{{ alumni.workAbroad is null ? '—' : (alumni.workAbroad ? 'Yes' : 'No') }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Country</span><strong>{{ alumni.countryOfEmployment ?? '—' }}</strong></div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div>
+                        <span class="text-gray-500 block text-xs">Status</span>
+                        <strong>{{ alumni.employmentStatus ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Type</span>
+                        <strong>{{ alumni.employmentType ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Job Title</span>
+                        <strong>{{ alumni.jobTitle ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Company</span>
+                        <strong>{{ alumni.companyName ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Company Address</span>
+                        <strong>{{ alumni.companyAddress ?? '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Monthly Salary</span>
+                        <strong>{{ alumni.monthlySalary ?? '—' }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
 
         {# Career Tracking #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-graph-up-arrow me-1"></i> Career Tracking</div>
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-graph-up mr-1"></i> Career Tracking</div>
             <div class="card-body">
-                <div class="row g-3 small">
-                    <div class="col-sm-4"><span class="text-muted d-block">Job Related to Course?</span><strong>{{ alumni.jobRelatedToCourse is null ? '—' : (alumni.jobRelatedToCourse ? 'Yes' : 'No') }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Promotion Received?</span><strong>{{ alumni.promotionReceived is null ? '—' : (alumni.promotionReceived ? 'Yes' : 'No') }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Date Promoted</span><strong>{{ alumni.datePromoted ? alumni.datePromoted|date('M d, Y') : '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Skills Used</span><strong>{{ alumni.skillsUsedInJob ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Trainings Attended</span><strong>{{ alumni.trainingsAttended ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Licenses Obtained</span><strong>{{ alumni.licensesObtained ?? '—' }}</strong></div>
-                    <div class="col-sm-6"><span class="text-muted d-block">Certifications</span><strong>{{ alumni.certifications ?? '—' }}</strong></div>
-                    <div class="col-12"><span class="text-muted d-block">Career Achievements</span><strong>{{ alumni.careerAchievements ?? '—' }}</strong></div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div>
+                        <span class="text-gray-500 block text-xs">Date Hired</span>
+                        <strong>{{ alumni.dateHired ? alumni.dateHired|date('M d, Y') : '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">First Job</span>
+                        <strong>{{ alumni.isFirstJob is not null ? (alumni.isFirstJob ? 'Yes' : 'No') : '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Working Abroad</span>
+                        <strong>{{ alumni.workAbroad is not null ? (alumni.workAbroad ? 'Yes' : 'No') : '—' }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block text-xs">Job Related to Course</span>
+                        <strong>{{ alumni.jobRelatedToCourse is not null ? (alumni.jobRelatedToCourse ? 'Yes' : 'No') : '—' }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {# Further Studies & Feedback #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-book me-1"></i> Further Studies & Feedback</div>
+        {# Employment History #}
+        {% if alumni.employments is defined and alumni.employments|length > 0 %}
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-clock-history mr-1"></i> Employment History</div>
             <div class="card-body">
-                <div class="row g-3 small">
-                    <div class="col-sm-4"><span class="text-muted d-block">Pursuing Further Studies?</span><strong>{{ alumni.furtherStudies is null ? '—' : (alumni.furtherStudies ? 'Yes' : 'No') }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">Postgraduate Degree</span><strong>{{ alumni.postgraduateDegree ?? '—' }}</strong></div>
-                    <div class="col-sm-4"><span class="text-muted d-block">School</span><strong>{{ alumni.schoolForFurtherStudies ?? '—' }}</strong></div>
-                    <div class="col-12"><span class="text-muted d-block">Suggestions for University</span><strong>{{ alumni.suggestionsForUniversity ?? '—' }}</strong></div>
-                </div>
-            </div>
-        </div>
-
-        {# Employment History (from related Employment entity) #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history me-1"></i> Employment History</span>
-            </div>
-            <div class="card-body">
-                {% if alumni.employments|length > 0 %}
+                <div class="space-y-3">
                     {% for emp in alumni.employments %}
-                    <div class="{% if not loop.last %}mb-3 pb-3 border-bottom{% endif %}">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong>{{ emp.jobTitle ?? 'Position N/A' }}</strong>
-                                <span class="text-muted">at {{ emp.companyName ?? 'Company N/A' }}</span>
-                            </div>
-                            <span class="badge bg-light text-dark small">{{ emp.employmentStatus ?? '' }}</span>
+                    <div class="flex gap-3 border-l-4 border-norsu pl-4 py-2">
+                        <div class="shrink-0 w-10 h-10 rounded-full bg-blue-100 text-norsu flex items-center justify-center">
+                            <i class="bi bi-building"></i>
                         </div>
-                        <div class="small text-muted mt-1">
-                            {{ emp.dateHired ? emp.dateHired|date('M Y') : '?' }} — {{ emp.dateEnded ? emp.dateEnded|date('M Y') : 'Present' }}
-                            {% if emp.industry %} &middot; {{ emp.industry }}{% endif %}
-                            {% if emp.isAbroad %} &middot; <i class="bi bi-globe2"></i> {{ emp.country ?? 'Abroad' }}{% endif %}
+                        <div class="flex-1">
+                            <h6 class="font-semibold mb-0">{{ emp.jobTitle ?? 'Position N/A' }}</h6>
+                            <div class="text-sm text-gray-600">{{ emp.companyName ?? '' }}</div>
+                            <div class="text-xs text-gray-400">
+                                {{ emp.dateHired ? emp.dateHired|date('M Y') : '?' }} — {{ emp.dateEnded ? emp.dateEnded|date('M Y') : 'Present' }}
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
-                {% else %}
-                    <p class="text-muted mb-0 small">No employment history records.</p>
-                {% endif %}
+                </div>
             </div>
         </div>
+        {% endif %}
 
         {# Documents #}
-        <div class="card mb-4">
-            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark me-1"></i> Documents</span>
-                <a href="{{ path('document_upload', {alumniId: alumni.id}) }}" class="btn btn-sm btn-norsu-gold"><i class="bi bi-upload me-1"></i>Upload</a>
-            </div>
-            <div class="card-body">
-                {% if alumni.documents|length > 0 %}
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead class="table-light"><tr><th>Type</th><th>Filename</th><th>Uploaded</th></tr></thead>
-                            <tbody>
-                            {% for doc in alumni.documents %}
-                                <tr>
-                                    <td><span class="badge bg-light text-dark">{{ doc.documentType }}</span></td>
-                                    <td>{{ doc.originalFilename }}</td>
-                                    <td>{{ doc.uploadedAt|date('M d, Y') }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-muted mb-0 small">No documents uploaded.</p>
+        <div class="card">
+            <div class="card-header bg-white flex justify-between items-center">
+                <span class="font-semibold"><i class="bi bi-file-earmark mr-1"></i> Documents</span>
+                {% if is_granted('ROLE_STAFF') %}
+                    <a href="{{ path('document_upload', {alumniId: alumni.id}) }}" class="btn-outline-norsu btn-xs"><i class="bi bi-plus mr-1"></i>Upload</a>
                 {% endif %}
             </div>
+            {% if alumni.documents|length > 0 %}
+            <div class="p-0 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+                        <tr>
+                            <th class="pl-4 py-2 font-semibold text-left">Type</th>
+                            <th class="py-2 font-semibold text-left">Filename</th>
+                            <th class="py-2 font-semibold text-left">Uploaded</th>
+                            <th class="text-right pr-4 py-2 font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for doc in alumni.documents %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="pl-4 py-2"><span class="badge bg-gray-100 text-gray-700">{{ doc.documentType }}</span></td>
+                            <td class="py-2">{{ doc.originalFilename }}</td>
+                            <td class="py-2 text-xs">{{ doc.uploadedAt|date('M d, Y') }}</td>
+                            <td class="text-right pr-4 py-2">
+                                <div class="flex gap-1 justify-end">
+                                    <a href="{{ path('document_download', {id: doc.id}) }}" class="btn-outline-norsu btn-xs"><i class="bi bi-download"></i></a>
+                                    {% if is_granted('ROLE_STAFF') %}
+                                    <form method="post" action="{{ path('document_delete', {id: doc.id}) }}" class="inline"
+                                          onsubmit="return confirm('Delete this document?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ doc.id) }}">
+                                        <button class="btn-danger btn-xs"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-gray-500 text-sm py-6">
+                <i class="bi bi-file-earmark text-2xl block mb-1 opacity-25"></i>
+                No documents uploaded yet.
+            </div>
+            {% endif %}
         </div>
+
+        {# Suggestions #}
+        {% if alumni.suggestionsForUniversity %}
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-chat-dots mr-1"></i> Suggestions / Feedback</div>
+            <div class="card-body">
+                <div class="p-3 bg-gray-100 rounded-lg text-sm">{{ alumni.suggestionsForUniversity }}</div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

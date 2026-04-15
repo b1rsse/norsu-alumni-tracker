@@ -1,5 +1,7 @@
 import { startStimulusApp } from '@symfony/stimulus-bundle';
+import DropdownMenuController from './controllers/dropdown_menu_controller.js';
+import AnnouncementSearchController from './controllers/announcement_search_controller.js';
 
 const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+app.register('dropdown-menu', DropdownMenuController);
+app.register('announcement-search', AnnouncementSearchController);

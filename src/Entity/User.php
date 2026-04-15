@@ -8,26 +8,39 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['schoolId'], message: 'There is already an account with this school ID')]
+#[Assert\Callback('validateRoleConsistency')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    public const ROLE_ALUMNI = 'ROLE_ALUMNI';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $lastName = null;
+
+    #[ORM\Column(length: 50, unique: true, nullable: true)]
+    private ?string $schoolId = null;
 
     /** @var list<string> */
     #[ORM\Column]
@@ -37,6 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 50)]
+    // Default applies only on new object creation; explicit setAccountStatus() values are persisted as-is.
     private string $accountStatus = 'pending'; // pending, active, inactive
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -45,8 +59,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastLogin = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $lastActivity = null;
+
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Alumni::class, cascade: ['persist'])]
     private ?Alumni $alumni = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: GtsSurvey::class)]
+    private ?GtsSurvey $gtsSurvey = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $dpaConsent = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dpaConsentDate = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $profileImage = null;
 
     public function __construct()
     {
@@ -63,6 +92,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getLastName(): ?string { return $this->lastName; }
     public function setLastName(string $lastName): static { $this->lastName = $lastName; return $this; }
+
+    public function getSchoolId(): ?string { return $this->schoolId; }
+    public function setSchoolId(?string $schoolId): static { $this->schoolId = $schoolId; return $this; }
 
     public function getUserIdentifier(): string { return (string) $this->email; }
 
@@ -91,10 +123,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getLastLogin(): ?\DateTimeInterface { return $this->lastLogin; }
     public function setLastLogin(?\DateTimeInterface $v): static { $this->lastLogin = $v; return $this; }
 
+    public function getLastActivity(): ?\DateTimeInterface { return $this->lastActivity; }
+    public function setLastActivity(?\DateTimeInterface $v): static { $this->lastActivity = $v; return $this; }
+
     public function getAlumni(): ?Alumni { return $this->alumni; }
     public function setAlumni(?Alumni $alumni): static { $this->alumni = $alumni; return $this; }
 
+    public function getGtsSurvey(): ?GtsSurvey { return $this->gtsSurvey; }
+    public function setGtsSurvey(?GtsSurvey $gtsSurvey): static
+    {
+        $this->gtsSurvey = $gtsSurvey;
+        return $this;
+    }
+
     public function getFullName(): string { return $this->firstName . ' ' . $this->lastName; }
 
-    public function isAdmin(): bool { return in_array('ROLE_ADMIN', $this->roles); }
+    public function isAdmin(): bool { return in_array('ROLE_ADMIN', $this->roles, true); }
+
+    public function validateRoleConsistency(ExecutionContextInterface $context): void
+    {
+        $isAlumniAccount = $this->alumni !== null || in_array(self::ROLE_ALUMNI, $this->roles, true);
+        $isAdminAccount = in_array('ROLE_ADMIN', $this->roles, true);
+
+        if ($isAlumniAccount && $isAdminAccount) {
+            $context->buildViolation('Alumni accounts cannot be assigned ROLE_ADMIN.')
+                ->atPath('roles')
+                ->addViolation();
+        }
+    }
+
+    public function isDpaConsent(): bool { return $this->dpaConsent; }
+    public function setDpaConsent(bool $v): static { $this->dpaConsent = $v; return $this; }
+
+    public function getDpaConsentDate(): ?\DateTimeInterface { return $this->dpaConsentDate; }
+    public function setDpaConsentDate(?\DateTimeInterface $v): static { $this->dpaConsentDate = $v; return $this; }
+
+    public function getProfileImage(): ?string { return $this->profileImage; }
+    public function setProfileImage(?string $v): static { $this->profileImage = $v; return $this; }
 }

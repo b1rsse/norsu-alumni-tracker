@@ -1,12 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-Content-Type-Options" content="nosniff">
+        <meta name="referrer" content="strict-origin-when-cross-origin">
         <title>{% block title %}NORSU Alumni Tracker{% endblock %}</title>
         <link rel="icon" type="image/webp" href="{{ asset('images/norsu-logo.webp') }}">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+        {# ── Bootstrap Icons (icon font only — not Bootstrap CSS/JS) ── #}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+
+        <!-- Print-friendly styles -->
+        <style>
+            @media print {
+                /* Hide navigation, sidebar, and non-essential UI */
+                nav, .sidebar, .no-print, footer, .btn, button,
+                form:not(.print-form), .pagination, .alert,
+                .bi, [class*="bi-"] { display: none !important; }
+
+                /* Full width content */
+                .main-content, .container, .card {
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                }
+
+                body {
+                    background: white !important;
+                    color: black !important;
+                    font-size: 12pt !important;
+                }
+
+                /* Table styling for print */
+                table { border-collapse: collapse !important; width: 100% !important; }
+                th, td { border: 1px solid #333 !important; padding: 4px 8px !important; }
+                th { background: #eee !important; }
+
+                /* Page breaks */
+                .page-break { page-break-before: always; }
+                tr { page-break-inside: avoid; }
+
+                /* Show print header */
+                .print-header { display: block !important; }
+
+                a { text-decoration: none !important; color: black !important; }
+            }
+
+            body.no-navbar .pt-\[64px\] {
+                padding-top: 0 !important;
+            }
+        </style>
+
         {% block stylesheets %}{% endblock %}
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
@@ -14,119 +61,227 @@
     </head>
     <body class="{% block body_class %}{% endblock %}">
         {# ── TOP NAVBAR ── #}
-        <nav class="navbar navbar-expand-lg navbar-dark navbar-norsu fixed-top">
-            <div class="container-fluid px-3">
+        <nav class="fixed top-0 left-0 right-0 z-[1030] shadow-[0_3px_16px_rgba(30,64,175,0.3)] min-h-[64px] py-1.5"
+             style="background:linear-gradient(135deg,#1E3A8A 0%,#1E40AF 60%,#3B82F6 100%)" id="mainNavbar">
+            <div class="w-full px-3 flex items-center min-h-[56px]">
                 {% if app.user %}
-                <button class="btn btn-link text-white d-lg-none me-2 p-0" id="sidebarToggle" type="button">
-                    <i class="bi bi-list fs-4"></i>
-                </button>
+                    {# ─ Logged-in: sidebar toggle + brand + user initials ─ #}
+                    <button class="text-white lg:hidden mr-2 p-0 bg-transparent border-0 cursor-pointer" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                    <a class="flex items-center gap-2.5 text-white no-underline font-extrabold text-lg hover:text-white mr-auto" href="{{ path('app_home') }}">
+                        <span class="flex items-center justify-center flex-shrink-0" style="width:38px;height:38px;">
+                            <img src="{{ asset('images/norsu-navbar-logo.webp') }}" alt="NORSU Logo" class="object-contain shadow-sm" style="width:38px;height:38px;">
+                        </span>
+                        <span class="leading-tight">
+                            NORSU Alumni Tracker
+                            <span class="block text-[0.65rem] font-medium opacity-70 tracking-wider -mt-0.5">Negros Oriental State University</span>
+                        </span>
+                    </a>
+                    <div class="relative ml-2" id="userDropdownWrap">
+                        <button type="button" id="userDropdownBtn" class="w-[36px] h-[36px] rounded-full bg-white inline-flex items-center justify-center text-xs font-bold text-blue-800 cursor-pointer border-2 border-white/60 hover:ring-2 hover:ring-white/50 transition-all shadow-md" title="Account menu">
+                            {% if app.user.profileImage %}
+                                <img src="{{ asset('uploads/profile/' ~ app.user.profileImage) }}" alt="Profile" class="w-full h-full rounded-full object-cover">
+                            {% else %}
+                                {{ app.user.firstName|first }}{{ app.user.lastName|first }}
+                            {% endif %}
+                        </button>
+                        <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg ring-1 ring-black/5 py-1 z-[1050]">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm font-semibold text-gray-800 truncate">{{ app.user.firstName }} {{ app.user.lastName }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ app.user.email }}</p>
+                            </div>
+                            <a href="{{ path('app_profile') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 no-underline">
+                                <i class="bi bi-person-circle"></i> My Profile
+                            </a>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="{{ path('app_logout') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 no-underline">
+                                <i class="bi bi-box-arrow-left"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    {# ─ Guest: brand + collapsible Login / Register ─ #}
+                    <a class="flex items-center gap-2.5 text-white no-underline font-extrabold text-lg hover:text-white" href="{{ path('app_home') }}">
+                        <span class="flex items-center justify-center flex-shrink-0" style="width:38px;height:38px;">
+                            <img src="{{ asset('images/norsu-navbar-logo.webp') }}" alt="NORSU Logo" class="object-contain shadow-sm" style="width:38px;height:38px;">
+                        </span>
+                        <span>
+                            NORSU Alumni Tracker
+                            <span class="block text-[0.65rem] font-medium opacity-70 tracking-wider -mt-0.5">Negros Oriental State University</span>
+                        </span>
+                    </a>
+                    <button class="lg:hidden ml-auto text-white p-1.5 rounded border border-white/30 bg-transparent cursor-pointer" type="button" id="guestNavToggle" aria-label="Toggle navigation">
+                        <i class="bi bi-list text-xl"></i>
+                    </button>
+                    {% set guestRoute = app.request.attributes.get('_route')|default('') %}
+                    <div class="hidden lg:flex items-center ml-auto" id="guestNavDesktop" style="column-gap: 1.6rem;">
+                        <a class="text-white {{ guestRoute == 'app_home' ? '' : 'text-white/85 hover:text-white' }} font-bold text-xs uppercase tracking-wide no-underline" style="white-space: nowrap;" href="{{ path('app_home') }}">Home</a>
+                        <a class="text-white {{ guestRoute == 'app_about' ? '' : 'text-white/85 hover:text-white' }} font-bold text-xs uppercase tracking-wide no-underline" style="white-space: nowrap;" href="{{ path('app_about') }}">About</a>
+                        <a class="text-white {{ guestRoute == 'app_contact' ? '' : 'text-white/85 hover:text-white' }} font-bold text-xs uppercase tracking-wide no-underline" style="white-space: nowrap;" href="{{ path('app_contact') }}">Contact Us</a>
+                        <a class="text-white {{ guestRoute == 'app_faq' ? '' : 'text-white/85 hover:text-white' }} font-bold text-xs uppercase tracking-wide no-underline" style="white-space: nowrap;" href="{{ path('app_faq') }}">FAQ</a>
+                        <a class="inline-flex items-center justify-center bg-white text-blue-800 hover:bg-gray-100 font-bold text-xs uppercase tracking-wide no-underline px-3 py-2 rounded-lg" style="white-space: nowrap;" href="{{ path('app_register') }}">Join Now</a>
+                    </div>
+                    {# Mobile guest menu #}
+                    <div class="hidden absolute top-full left-0 right-0 bg-blue-900/95 backdrop-blur-sm shadow-lg lg:hidden z-50" id="guestNavMobile">
+                        <div class="px-4 py-3 flex flex-col gap-2">
+                            <a class="text-white/90 hover:text-white font-semibold py-2 no-underline" href="{{ path('app_home') }}">Home</a>
+                            <a class="text-white/90 hover:text-white font-semibold py-2 no-underline" href="{{ path('app_about') }}">About</a>
+                            <a class="text-white/90 hover:text-white font-semibold py-2 no-underline" href="{{ path('app_contact') }}">Contact Us</a>
+                            <a class="text-white/90 hover:text-white font-semibold py-2 no-underline" href="{{ path('app_faq') }}">FAQ</a>
+                            <a class="mt-1 inline-flex items-center justify-center rounded-lg bg-white text-blue-900 font-bold py-2.5 no-underline" href="{{ path('app_register') }}"><i class="bi bi-person-plus mr-1"></i>Join Now</a>
+                        </div>
+                    </div>
                 {% endif %}
-                <a class="navbar-brand" href="{{ path('app_home') }}">
-                    <span class="brand-icon"><img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU Logo" class="brand-logo-img"></span>
-                    <span>
-                        NORSU Alumni Tracker
-                        <span class="brand-text-sub">Negros Oriental State University</span>
-                    </span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        {% if app.user %}
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link nav-user d-flex align-items-center gap-2">
-                                    <span style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.2);display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700">{{ app.user.firstName|first }}{{ app.user.lastName|first }}</span>
-                                    {{ app.user.firstName }}
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                        <span class="badge bg-success" style="font-size:0.6rem">Admin</span>
-                                    {% endif %}
-                                </span>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="btn btn-norsu-gold btn-sm ms-2 mt-1" href="{{ path('app_register') }}">Register</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
             </div>
         </nav>
 
         {% if app.user %}
-        {# ── SIDEBAR (only for logged-in users) ── #}
-        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">Main Menu</div>
-            <nav class="nav flex-column">
-                <a class="nav-link {% if app.request.attributes.get('_route') == 'app_home' %}active{% endif %}"
-                   href="{{ path('app_home') }}">
+        {# ── SIDEBAR (logged-in only) ── #}
+        <div class="hidden fixed inset-0 bg-black/30 z-[1019]" id="sidebarBackdrop"></div>
+        <aside class="fixed left-0 top-[84px] w-[220px] xl:w-[248px] h-[calc(100vh-84px)] bg-white border-r border-gray-200 z-[1020] overflow-y-auto shadow-[2px_0_8px_rgba(0,0,0,0.04)] transition-transform duration-300 -translate-x-full lg:translate-x-0" id="sidebar">
+            <div class="pt-5 pb-3 px-4 text-[0.7rem] uppercase tracking-[1.5px] text-gray-400 font-bold select-none">Main Menu</div>
+            <nav class="flex flex-col">
+                <a class="sidebar-link {% if app.request.attributes.get('_route') in ['app_home', 'staff_dashboard'] %}active{% endif %}"
+                   href="{% if is_granted('ROLE_STAFF') and not is_granted('ROLE_ADMIN') %}{{ path('staff_dashboard') }}{% else %}{{ path('app_home') }}{% endif %}">
                     <i class="bi bi-speedometer2 sidebar-icon"></i> Dashboard
                 </a>
-                <a class="nav-link {% if 'alumni_' in app.request.attributes.get('_route')|default('') and app.request.attributes.get('_route') != 'alumni_create' %}active{% endif %}"
-                   href="{{ path('alumni_index') }}">
-                    <i class="bi bi-people-fill sidebar-icon"></i> Alumni Directory
-                </a>
-                <a class="nav-link {% if app.request.attributes.get('_route') == 'alumni_create' %}active{% endif %}"
-                   href="{{ path('alumni_create') }}">
-                    <i class="bi bi-person-plus-fill sidebar-icon"></i> Add Alumni
-                </a>
-                <a class="nav-link {% if 'announcement_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+
+                <a class="sidebar-link {% if 'announcement_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
                    href="{{ path('announcement_index') }}">
                     <i class="bi bi-megaphone-fill sidebar-icon"></i> Announcements
                 </a>
-                <a class="nav-link {% if app.request.attributes.get('_route') == 'feedback_submit' %}active{% endif %}"
+
+                <a class="sidebar-link {% if 'job_board_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('job_board_index') }}">
+                    <i class="bi bi-briefcase-fill sidebar-icon"></i> Job Announcements
+                </a>
+
+                {% if not is_granted('ROLE_ADMIN') %}
+                <a class="sidebar-link {% if app.request.attributes.get('_route') == 'feedback_submit' %}active{% endif %}"
                    href="{{ path('feedback_submit') }}">
                     <i class="bi bi-chat-dots sidebar-icon"></i> Submit Feedback
                 </a>
-                <a class="nav-link {% if 'report_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
-                   href="{{ path('report_index') }}">
-                    <i class="bi bi-clipboard-data sidebar-icon"></i> Reports
+                {% endif %}
+
+                {% if is_granted('ROLE_USER') and not is_granted('ROLE_STAFF') %}
+                <a class="sidebar-link {% if 'gts_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('gts_new') }}">
+                    <i class="bi bi-clipboard2-check sidebar-icon"></i> GTS Survey
                 </a>
+                {% endif %}
+
+                {% if is_granted('ROLE_STAFF') or is_granted('ROLE_ADMIN') %}
+                <a class="sidebar-link {% if app.request.attributes.get('_route') in ['admin_survey_preview', 'gts_index', 'gts_show'] %}active{% endif %}"
+                   href="{% if is_granted('ROLE_ADMIN') %}{{ path('admin_survey_preview', {id: 0}) }}{% else %}{{ path('gts_index') }}{% endif %}">
+                    <i class="bi bi-clipboard2-check sidebar-icon"></i> GTS Survey
+                </a>
+                <a class="sidebar-link {% if app.request.attributes.get('_route')|default('') == 'report_index' or app.request.attributes.get('_route')|default('') == 'report_export' %}active{% endif %}"
+                   href="{{ path('report_index') }}">
+                    <i class="bi bi-bar-chart-line sidebar-icon"></i> Reports
+                </a>
+                <a class="sidebar-link {% if 'report_import' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('report_import') }}">
+                    <i class="bi bi-upload sidebar-icon"></i> Import Data
+                </a>
+                <a class="sidebar-link {% if app.request.attributes.get('_route') == 'gts_index' %}active{% endif %}"
+                   href="{{ path('gts_index') }}">
+                    <i class="bi bi-clipboard2-data sidebar-icon"></i> GTS Responses
+                </a>
+                {% endif %}
             </nav>
 
-            {% if is_granted('ROLE_ADMIN') %}
-            <div class="sidebar-header">Administration</div>
-            <nav class="nav flex-column">
-                <a class="nav-link {% if 'report_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
-                   href="{{ path('report_index') }}">
-                    <i class="bi bi-clipboard-data sidebar-icon"></i> Reports
+            {% if is_granted('ROLE_USER') and not is_granted('ROLE_STAFF') and not is_granted('ROLE_ADMIN') %}
+            <div class="pt-3 pb-2 px-4 text-[0.7rem] uppercase tracking-[1.5px] text-gray-400 font-bold select-none">Account</div>
+            <nav class="flex flex-col">
+                <a class="sidebar-link {% if 'app_profile' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('app_profile') }}">
+                    <i class="bi bi-person-circle sidebar-icon"></i> My Profile
                 </a>
-                <a class="nav-link {% if 'feedback_index' == app.request.attributes.get('_route') or 'feedback_show' == app.request.attributes.get('_route') %}active{% endif %}"
-                   href="{{ path('feedback_index') }}">
-                    <i class="bi bi-chat-square-text-fill sidebar-icon"></i> Feedback
-                </a>
-                <a class="nav-link {% if 'admin_users' == app.request.attributes.get('_route') %}active{% endif %}"
-                   href="{{ path('admin_users') }}">
-                    <i class="bi bi-shield-lock sidebar-icon"></i> Manage Users
+                <a class="sidebar-link text-red-500 hover:bg-red-50 hover:text-red-700"
+                   href="{{ path('app_logout') }}">
+                    <i class="bi bi-box-arrow-left sidebar-icon"></i> Logout
                 </a>
             </nav>
             {% endif %}
 
-            <div class="sidebar-header">Account</div>
-            <nav class="nav flex-column mb-3">
-                <a class="nav-link {% if 'app_profile' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
-                   href="{{ path('app_profile') }}">
-                    <i class="bi bi-person-gear sidebar-icon"></i> Admin
+            {% if is_granted('ROLE_STAFF') and not is_granted('ROLE_ADMIN') %}
+                <div class="pt-3 pb-2 px-4 text-[0.7rem] uppercase tracking-[1.5px] text-gray-400 font-bold select-none">Staff Management</div>
+                <a class="sidebar-link {% if 'admin_verification' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('admin_verification') }}">
+                    <i class="bi bi-patch-check-fill sidebar-icon"></i> Verify Users
                 </a>
-                <a class="nav-link" href="{{ path('app_logout') }}">
-                    <i class="bi bi-box-arrow-left sidebar-icon"></i> Logout
+                <a class="sidebar-link {% if app.request.attributes.get('_route') in ['staff_gts_questions_index', 'staff_gts_questions_new', 'staff_gts_questions_edit'] %}active{% endif %}"
+                   href="{{ path('staff_gts_questions_index') }}">
+                    <i class="bi bi-ui-checks-grid sidebar-icon"></i> Edit Survey Questions
                 </a>
+                <a class="sidebar-link {% if 'tracer_' in app.request.attributes.get('_route')|default('') %}active{% endif %}"
+                   href="{{ path('tracer_index') }}">
+                    <i class="bi bi-clipboard-data sidebar-icon"></i> Tracer Study
+                </a>
+                <a class="sidebar-link {% if 'job_board_manage' == app.request.attributes.get('_route') %}active{% endif %}"
+                   href="{{ path('job_board_manage') }}">
+                    <i class="bi bi-briefcase-fill sidebar-icon"></i> Manage Jobs
+                </a>
+            {% endif %}
+
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="pt-3 pb-2 px-4 text-[0.7rem] uppercase tracking-[1.5px] text-gray-400 font-bold select-none">Administration</div>
+                {% set manageUsersOpen = app.request.attributes.get('_route') == 'alumni_index' or (app.request.attributes.get('_route') == 'admin_users' and app.request.query.get('role') == 'staff') %}
+                <div data-controller="dropdown-menu" class="mx-3 mb-1">
+                    <button
+                        type="button"
+                        class="sidebar-link w-full justify-between {% if manageUsersOpen %}active{% endif %}"
+                        data-action="click->dropdown-menu#toggle"
+                        data-dropdown-menu-target="button"
+                        aria-expanded="{{ manageUsersOpen ? 'true' : 'false' }}"
+                    >
+                        <span class="flex items-center gap-3">
+                            <i class="bi bi-people-fill sidebar-icon"></i>
+                            Manage Users
+                        </span>
+                        <i class="bi bi-chevron-down text-xs transition-transform" data-dropdown-menu-target="icon" style="{{ manageUsersOpen ? 'transform: rotate(180deg);' : '' }}"></i>
+                    </button>
+
+                    <div class="mt-1 rounded-lg bg-gray-50 {{ manageUsersOpen ? '' : 'hidden' }}" data-dropdown-menu-target="menu">
+                        <a class="sidebar-link py-2 text-sm {% if app.request.attributes.get('_route') == 'admin_users' and app.request.query.get('role') == 'staff' %}active{% endif %}" href="{{ path('admin_users', { role: 'staff' }) }}">
+                            <i class="bi bi-person-badge sidebar-icon"></i> Staff
+                        </a>
+                        <a class="sidebar-link py-2 text-sm {% if app.request.attributes.get('_route') == 'alumni_index' %}active{% endif %}" href="{{ path('alumni_index') }}">
+                            <i class="bi bi-mortarboard sidebar-icon"></i> Alumni
+                        </a>
+                    </div>
+                </div>
+
+                <a class="sidebar-link {% if app.request.attributes.get('_route') starts with 'admin_audit' %}active{% endif %}" href="{{ path('admin_audit_log') }}">
+                    <i class="bi bi-journal-text sidebar-icon"></i> Audit Log
+                </a>
+                <a class="sidebar-link {% if app.request.attributes.get('_route') starts with 'admin_email' %}active{% endif %}" href="{{ path('admin_email_index') }}">
+                    <i class="bi bi-envelope-paper sidebar-icon"></i> Email
+                </a>
+
+                <div class="pt-3 pb-2 px-4 text-[0.7rem] uppercase tracking-[1.5px] text-gray-400 font-bold select-none">Academic Management</div>
+                <a class="sidebar-link {% if app.request.attributes.get('_route') starts with 'admin_college' %}active{% endif %}"
+                   href="{{ path('admin_colleges') }}">
+                    <i class="bi bi-building sidebar-icon"></i> Colleges
+                </a>
+                <a class="sidebar-link {% if app.request.attributes.get('_route') starts with 'admin_department' %}active{% endif %}"
+                   href="{{ path('admin_departments') }}">
+                    <i class="bi bi-diagram-3 sidebar-icon"></i> Departments
+                </a>
+            {% endif %}
             </nav>
         </aside>
         {% endif %}
 
         {# ── MAIN CONTENT ── #}
-        <div class="{% if app.user %}main-content{% else %}main-content-full{% endif %}" style="padding-top: 72px;">
+        <div class="{% if app.user %}lg:ml-[220px] xl:ml-[248px] pt-[84px] px-4 pb-4 xl:px-6 xl:pb-6{% else %}pt-[64px]{% endif %} min-h-screen transition-[margin-left] duration-300">
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="{% if app.user %}px-0{% else %}container{% endif %} mt-3">
-                        <div class="alert alert-{{ label }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="{% if app.user %}{% else %}max-w-7xl mx-auto px-4{% endif %} mt-3">
+                        <div class="alert alert-{{ label }}">
+                            <span class="flex-1">{{ message }}</span>
+                            <button type="button" class="text-current opacity-50 hover:opacity-100 ml-2 cursor-pointer bg-transparent border-0 text-lg leading-none" onclick="this.parentElement.remove()">&times;</button>
                         </div>
                     </div>
                 {% endfor %}
@@ -135,24 +290,25 @@
             {% block body %}{% endblock %}
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        {# Sidebar & Turbo logic in assets/app.js (ES module) #}
+
         <script>
-            // Sidebar toggle for mobile
-            const toggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            if (toggle) {
-                toggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('show');
-                    backdrop.classList.toggle('show');
-                });
-            }
-            if (backdrop) {
-                backdrop.addEventListener('click', () => {
-                    sidebar.classList.remove('show');
-                    backdrop.classList.remove('show');
-                });
-            }
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.password-toggle-btn');
+                if (!btn) return;
+                e.preventDefault();
+                var input = btn.parentElement.querySelector('input');
+                var icon = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                }
+            });
         </script>
     </body>
 </html>

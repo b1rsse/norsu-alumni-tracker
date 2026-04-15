@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AlumniRepository::class)]
 class Alumni
@@ -18,15 +19,21 @@ class Alumni
 
     // ── Personal Information ──
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private string $studentNumber;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private string $firstName;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $middleName = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private string $lastName;
 
     #[ORM\Column(length: 20, nullable: true)]
@@ -45,6 +52,8 @@ class Alumni
     private ?string $contactNumber = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private string $emailAddress;
 
     #[ORM\Column(length: 500, nullable: true)]
@@ -87,6 +96,12 @@ class Alumni
     // ── Employment Information (current snapshot) ──
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $employmentStatus = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $tracerStatus = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $lastTracerSubmissionAt = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $employmentType = null;
@@ -173,6 +188,10 @@ class Alumni
 
     #[ORM\Column(nullable: true)]
     private ?bool $willingForMentorship = null;
+
+    // ── Soft Delete ──
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
 
     // ── Relations ──
     #[ORM\OneToOne(inversedBy: 'alumni', targetEntity: User::class)]
@@ -272,6 +291,12 @@ class Alumni
     public function getEmploymentStatus(): ?string { return $this->employmentStatus; }
     public function setEmploymentStatus(?string $v): static { $this->employmentStatus = $v; return $this; }
 
+    public function getTracerStatus(): ?string { return $this->tracerStatus; }
+    public function setTracerStatus(?string $v): static { $this->tracerStatus = $v; return $this; }
+
+    public function getLastTracerSubmissionAt(): ?\DateTimeInterface { return $this->lastTracerSubmissionAt; }
+    public function setLastTracerSubmissionAt(?\DateTimeInterface $v): static { $this->lastTracerSubmissionAt = $v; return $this; }
+
     public function getEmploymentType(): ?string { return $this->employmentType; }
     public function setEmploymentType(?string $v): static { $this->employmentType = $v; return $this; }
 
@@ -355,6 +380,9 @@ class Alumni
 
     public function isWillingForMentorship(): ?bool { return $this->willingForMentorship; }
     public function setWillingForMentorship(?bool $v): static { $this->willingForMentorship = $v; return $this; }
+
+    public function getDeletedAt(): ?\DateTimeInterface { return $this->deletedAt; }
+    public function setDeletedAt(?\DateTimeInterface $v): static { $this->deletedAt = $v; return $this; }
 
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $v): static { $this->user = $v; return $this; }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,7 @@ class RegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
+        NotificationService $notifier,
     ): Response {
         // If already logged in, redirect to home
         if ($this->getUser()) {
@@ -29,19 +31,27 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
+            // This form does not collect password fields; generate a secure random password value.
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
                     $user,
-                    $form->get('plainPassword')->getData()
+                    bin2hex(random_bytes(32))
                 )
             );
+
+            $user->setRoles(['ROLE_ALUMNI']);
+            $user->setAccountStatus('pending');
 
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Account created successfully! Please log in.');
+            try {
+                $notifier->notifyNewRegistration($user);
+            } catch (\Throwable) {
+                // Email delivery failure should not block registration
+            }
 
+            $this->addFlash('success', 'Registration submitted successfully. Your account is registered as alumni and is pending administrator review.');
             return $this->redirectToRoute('app_login');
         }
 

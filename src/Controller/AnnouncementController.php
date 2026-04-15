@@ -17,7 +17,7 @@ class AnnouncementController extends AbstractController
     #[Route('/', name: 'announcement_index', methods: ['GET'])]
     public function index(AnnouncementRepository $repo): Response
     {
-        // Admins see all announcements; alumni only see active ones
+        // Only admins can see inactive/draft announcements in list view.
         if ($this->isGranted('ROLE_ADMIN')) {
             $announcements = $repo->findBy([], ['datePosted' => 'DESC']);
         } else {
@@ -56,6 +56,10 @@ class AnnouncementController extends AbstractController
     #[Route('/{id}', name: 'announcement_show', methods: ['GET'])]
     public function show(Announcement $announcement): Response
     {
+        if (!$announcement->isActive() && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createNotFoundException();
+        }
+
         return $this->render('announcement/show.html.twig', [
             'announcement' => $announcement,
         ]);

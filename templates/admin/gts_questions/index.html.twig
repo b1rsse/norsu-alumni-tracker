@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}GTS Question Bank{% endblock %}
+
+{% block body %}
+{% set questionIndexRoute = is_granted('ROLE_ADMIN') ? 'admin_gts_questions_index' : 'staff_gts_questions_index' %}
+{% set questionNewRoute = is_granted('ROLE_ADMIN') ? 'admin_gts_questions_new' : 'staff_gts_questions_new' %}
+{% set questionEditRoute = is_granted('ROLE_ADMIN') ? 'admin_gts_questions_edit' : 'staff_gts_questions_edit' %}
+{% set questionDeleteRoute = is_granted('ROLE_ADMIN') ? 'admin_gts_questions_delete' : 'staff_gts_questions_delete' %}
+<div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900"><i class="bi bi-ui-checks-grid mr-2 text-blue-700"></i>GTS Question Bank</h1>
+        <p class="text-sm text-gray-500">Manage editable Graduate Tracer Survey questions.</p>
+    </div>
+    <a href="{{ path(questionNewRoute) }}" class="btn-norsu"><i class="bi bi-plus-lg mr-1"></i>Add Question</a>
+</div>
+
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+            <tr>
+                <th class="px-4 py-3 text-left font-semibold">Section</th>
+                <th class="px-4 py-3 text-left font-semibold">Question</th>
+                <th class="px-4 py-3 text-left font-semibold">Input Type</th>
+                <th class="px-4 py-3 text-left font-semibold">Order</th>
+                <th class="px-4 py-3 text-left font-semibold">Status</th>
+                <th class="px-4 py-3 text-right font-semibold">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for question in questions %}
+                <tr class="hover:bg-blue-50/30">
+                    <td class="px-4 py-3 font-semibold text-gray-800">{{ question.section }}</td>
+                    <td class="px-4 py-3 text-gray-700">{{ question.questionText }}</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">{{ question.inputType }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">{{ question.sortOrder }}</td>
+                    <td class="px-4 py-3">
+                        {% if question.isActive %}
+                            <span class="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">Active</span>
+                        {% else %}
+                            <span class="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <a href="{{ path(questionEditRoute, {id: question.id}) }}" class="btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{{ path(questionDeleteRoute, {id: question.id}) }}" class="inline" onsubmit="return confirm('Delete this question?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_gts_question_' ~ question.id) }}">
+                            <button class="btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="px-4 py-10 text-center text-gray-500">No survey questions configured yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

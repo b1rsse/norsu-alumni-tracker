@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact Us — NORSU Alumni Tracker{% endblock %}
+
+{% block body %}
+<div class="hero-section relative overflow-hidden text-white py-16 mb-8" style="background-color:#1E3A8A;background-image:linear-gradient(118deg,rgba(6,24,63,0.84) 0%,rgba(13,65,120,0.66) 48%,rgba(5,150,105,0.54) 100%),url('{{ asset('images/home-hero-graduation.png') }}');background-size:cover;background-position:center;background-repeat:no-repeat;">
+    <div class="max-w-5xl mx-auto px-4 relative z-10 text-center" style="padding-top:2rem;">
+        <h1 class="font-extrabold text-4xl md:text-5xl mb-3">Contact Us</h1>
+        <p class="text-lg text-white/90 max-w-3xl mx-auto">Reach the NORSU Alumni Tracker team for account concerns, verification, survey support, and system inquiries.</p>
+    </div>
+</div>
+
+<div class="max-w-6xl mx-auto px-4 pb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="font-bold text-lg mb-3 text-blue-800"><i class="bi bi-building mr-1"></i>Office Information</h5>
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p class="mb-0"><strong>Office:</strong> Alumni Affairs and Linkages Office</p>
+                    <p class="mb-0"><strong>University:</strong> Negros Oriental State University</p>
+                    <p class="mb-0"><strong>Address:</strong> Dumaguete City, Negros Oriental, Philippines</p>
+                    <p class="mb-0"><strong>Email:</strong> alumni@norsu.edu.ph</p>
+                    <p class="mb-0"><strong>Phone:</strong> +63 (35) 000-0000</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="font-bold text-lg mb-3 text-emerald-700"><i class="bi bi-clock-history mr-1"></i>Support Hours</h5>
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p class="mb-0"><strong>Monday to Friday:</strong> 8:00 AM – 5:00 PM</p>
+                    <p class="mb-0"><strong>Saturday:</strong> 8:00 AM – 12:00 PM</p>
+                    <p class="mb-0"><strong>Sunday / Holidays:</strong> Closed</p>
+                </div>
+                <hr class="my-3">
+                <p class="text-sm text-gray-500 mb-0">For urgent account concerns, please include your full name and registered email when contacting support.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'home/_public_footer.html.twig' %}
+{% endblock %}

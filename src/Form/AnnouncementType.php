@@ -17,11 +17,11 @@ class AnnouncementType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Title',
-                'attr' => ['class' => 'form-control'],
+                'attr' => ['class' => 'form-input'],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'attr' => ['class' => 'form-control', 'rows' => 5],
+                'attr' => ['class' => 'form-input', 'rows' => 5],
             ])
             ->add('category', ChoiceType::class, [
                 'label' => 'Category',

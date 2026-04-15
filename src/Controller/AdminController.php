@@ -3,34 +3,82 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserType;
 use App\Repository\AlumniRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin')]
-#[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
     // ── Users Management ──
 
-    #[Route('/users', name: 'admin_users', methods: ['GET'])]
-    public function users(UserRepository $repo): Response
+    #[Route('/users/create-staff', name: 'app_staff_create', methods: ['GET'])]
+    #[Route('/staff/new', name: 'app_staff_new', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function createStaffShortcut(): Response
     {
-        $users = $repo->findBy([], ['dateRegistered' => 'DESC']);
+        $this->addFlash('info', 'Staff creation form is not yet configured. You can promote an existing account from Manage Users.');
+
+        return $this->redirectToRoute('admin_users');
+    }
+
+    #[Route('/users/create-alumni', name: 'app_alumni_create', methods: ['GET'])]
+    #[Route('/alumni/new', name: 'app_alumni_new', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function createAlumniShortcut(): Response
+    {
+        return $this->redirectToRoute('alumni_create');
+    }
+
+    #[Route('/users', name: 'admin_users', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function users(Request $request, UserRepository $repo): Response
+    {
+        $page  = max(1, $request->query->getInt('page', 1));
+        $limit = 20;
+        $search = $request->query->get('q', '');
+        $roleFilter = $request->query->get('role', '');
+
+        $qb = $repo->createQueryBuilder('u');
+
+        if ($search !== '') {
+            $qb->andWhere('u.firstName LIKE :q OR u.lastName LIKE :q OR u.email LIKE :q')
+               ->setParameter('q', '%' . $search . '%');
+        }
+
+        if ($roleFilter === 'staff') {
+            $qb->andWhere('u.roles LIKE :staffRole')
+               ->setParameter('staffRole', '%"ROLE_STAFF"%');
+        }
+
+        $qb->orderBy('u.dateRegistered', 'DESC');
+        $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
+        $paginator = new Paginator($qb);
+        $totalItems = count($paginator);
+        $totalPages = (int) ceil($totalItems / $limit);
+
         $pendingCount = $repo->count(['accountStatus' => 'pending']);
 
         return $this->render('admin/users.html.twig', [
-            'users' => $users,
+            'users' => $paginator,
             'pendingCount' => $pendingCount,
+            'currentPage' => $page,
+            'totalPages'  => $totalPages,
+            'search' => $search,
+            'roleFilter' => $roleFilter,
         ]);
     }
 
     #[Route('/users/{id}/approve', name: 'admin_user_approve', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function approveUser(User $user, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('approve' . $user->getId(), $request->request->get('_token'))) {
@@ -43,6 +91,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/users/{id}/toggle-status', name: 'admin_user_toggle_status', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function toggleUserStatus(User $user, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('toggle' . $user->getId(), $request->request->get('_token'))) {
@@ -56,6 +105,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/users/{id}/toggle-admin', name: 'admin_user_toggle_admin', methods: ['POST'])]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function toggleAdmin(User $user, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('admin' . $user->getId(), $request->request->get('_token'))) {
@@ -63,6 +113,10 @@ class AdminController extends AbstractController
             if (in_array('ROLE_ADMIN', $roles)) {
                 $user->setRoles([]);
             } else {
+                if ($user->getAlumni() !== null || in_array(User::ROLE_ALUMNI, $roles, true)) {
+                    $this->addFlash('danger', 'Cannot assign ROLE_ADMIN to an alumni account.');
+                    return $this->redirectToRoute('admin_users');
+                }
                 $user->setRoles(['ROLE_ADMIN']);
             }
             $em->flush();
@@ -72,19 +126,118 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_users');
     }
 
+    #[Route('/users/{id}/edit', name: 'admin_user_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function editUser(User $user, Request $request, EntityManagerInterface $em): Response
+    {
+        $currentUser = $this->getUser();
+        $originalRoles = $user->getRoles();
+
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $selectedRole = $form->get('roles')->getData();
+            if (is_string($selectedRole) && $selectedRole !== '') {
+                // Ensure Doctrine receives roles as an array when dropdown returns a string.
+                $user->setRoles([$selectedRole]);
+            } elseif (is_array($selectedRole)) {
+                $user->setRoles($selectedRole);
+            }
+
+            if ($currentUser instanceof User && $currentUser->getId() === $user->getId() && $originalRoles !== $user->getRoles()) {
+                $user->setRoles($originalRoles);
+                $this->addFlash('danger', 'You cannot change your own role.');
+
+                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+            }
+
+            try {
+                $em->flush();
+                $this->addFlash('success', 'User account updated successfully.');
+
+                return $this->redirectToRoute('admin_users');
+            } catch (\Throwable $e) {
+                $this->addFlash('danger', 'Database error while saving user: ' . $e->getMessage());
+            }
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', 'Validation error: ' . $error->getMessage());
+            }
+        }
+
+        return $this->render('admin/user_edit.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
+    }
+
     #[Route('/users/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteUser(User $user, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
-            if ($user === $this->getUser()) {
+            $currentUser = $this->getUser();
+
+            if ($user === $currentUser) {
                 $this->addFlash('danger', 'You cannot delete your own account.');
                 return $this->redirectToRoute('admin_users');
             }
-            $em->remove($user);
-            $em->flush();
-            $this->addFlash('success', 'User deleted.');
+
+            if (!$currentUser instanceof User) {
+                $this->addFlash('danger', 'Unable to verify current admin account.');
+                return $this->redirectToRoute('admin_users');
+            }
+
+            try {
+                // Prevent FK violations by transferring historical audit ownership
+                // to the acting admin before deleting the target account.
+                $em->createQuery('UPDATE App\\Entity\\AuditLog a SET a.performedBy = :replacement WHERE a.performedBy = :target')
+                    ->setParameter('replacement', $currentUser)
+                    ->setParameter('target', $user)
+                    ->execute();
+
+                $em->remove($user);
+                $em->flush();
+                $this->addFlash('success', 'User deleted.');
+            } catch (\Throwable $e) {
+                $this->addFlash('danger', 'Unable to delete user: ' . $e->getMessage());
+            }
         }
 
         return $this->redirectToRoute('admin_users');
     }
+
+    // ── Users Export ──
+
+    #[Route('/users/export', name: 'admin_users_export', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function usersExport(UserRepository $repo): StreamedResponse
+    {
+        $users = $repo->findBy([], ['dateRegistered' => 'DESC']);
+
+        $response = new StreamedResponse(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name', 'Email', 'Role', 'Status', 'Date Registered', 'Last Login']);
+            foreach ($users as $u) {
+                $role = in_array('ROLE_ADMIN', $u->getRoles()) ? 'Admin' :
+                       (in_array('ROLE_STAFF', $u->getRoles()) ? 'Staff' : 'Alumni');
+                fputcsv($handle, [
+                    $u->getFullName(),
+                    $u->getEmail(),
+                    $role,
+                    $u->getAccountStatus(),
+                    $u->getDateRegistered()?->format('Y-m-d'),
+                    $u->getLastLogin()?->format('Y-m-d H:i'),
+                ]);
+            }
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="users_' . date('Ymd') . '.csv"');
+
+        return $response;
+    }
+
 }

@@ -3,90 +3,185 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Manage Users</h4>
+<div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="font-bold text-xl mb-0"><i class="bi bi-people-fill mr-2"></i>Manage Users</h4>
+        <p class="text-gray-500 text-sm mb-0">View and manage all registered accounts</p>
+    </div>
     {% if pendingCount > 0 %}
-        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-hourglass-split me-1"></i>{{ pendingCount }} pending</span>
+        <span class="bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full no-print"><i class="bi bi-hourglass-split mr-1"></i>{{ pendingCount }} pending</span>
     {% endif %}
-</div>
+    <div class="flex items-center gap-2 no-print">
+        <div class="relative" data-controller="dropdown-menu">
+            <button type="button"
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition"
+                    data-action="click->dropdown-menu#toggle"
+                    data-dropdown-menu-target="button"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                <i class="bi bi-person-plus-fill"></i>
+                Create User
+                <i class="bi bi-chevron-down text-xs"></i>
+            </button>
 
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-3">Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Registered</th>
-                        <th>Last Login</th>
-                        <th class="text-end pe-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr class="{{ user.accountStatus == 'pending' ? 'table-warning' : '' }}">
-                        <td class="ps-3 fw-semibold">{{ user.fullName }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            {% if 'ROLE_ADMIN' in user.roles %}
-                                <span class="badge bg-danger">Admin</span>
-                            {% else %}
-                                <span class="badge bg-primary">Alumni</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if user.accountStatus == 'active' %}
-                                <span class="badge badge-employed">Active</span>
-                            {% elseif user.accountStatus == 'pending' %}
-                                <span class="badge bg-warning text-dark">Pending</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td class="small">{{ user.dateRegistered|date('M d, Y') }}</td>
-                        <td class="small">{{ user.lastLogin ? user.lastLogin|date('M d, Y H:i') : '—' }}</td>
-                        <td class="text-end pe-3">
-                            <div class="btn-group btn-group-sm">
-                                {% if user.accountStatus == 'pending' %}
-                                <form method="post" action="{{ path('admin_user_approve', {id: user.id}) }}" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ user.id) }}">
-                                    <button class="btn btn-success btn-sm" title="Approve"><i class="bi bi-check-lg"></i></button>
-                                </form>
-                                {% endif %}
-
-                                <form method="post" action="{{ path('admin_user_toggle_status', {id: user.id}) }}" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
-                                    <button class="btn btn-outline-secondary btn-sm" title="Toggle Active/Inactive">
-                                        <i class="bi {{ user.accountStatus == 'active' ? 'bi-pause-circle' : 'bi-play-circle' }}"></i>
-                                    </button>
-                                </form>
-
-                                <form method="post" action="{{ path('admin_user_toggle_admin', {id: user.id}) }}" class="d-inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('admin' ~ user.id) }}">
-                                    <button class="btn btn-outline-warning btn-sm" title="Toggle Admin">
-                                        <i class="bi bi-shield-lock"></i>
-                                    </button>
-                                </form>
-
-                                {% if user != app.user %}
-                                <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" class="d-inline"
-                                      onsubmit="return confirm('Delete this user?')">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                                    <button class="btn btn-outline-danger btn-sm" title="Delete"><i class="bi bi-trash"></i></button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
+                 data-dropdown-menu-target="menu">
+                <a href="{{ path('app_staff_create') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-t-lg">
+                    <i class="bi bi-person-badge mr-2"></i>Create Staff
+                </a>
+                <a href="{{ path('app_alumni_create') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-b-lg border-t border-gray-100">
+                    <i class="bi bi-mortarboard mr-2"></i>Create Alumni
+                </a>
+            </div>
         </div>
+
+        <a href="{{ path('admin_users_export') }}" class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition">
+            <i class="bi bi-file-earmark-spreadsheet"></i>Export CSV
+        </a>
+        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition">
+            <i class="bi bi-printer"></i>Print
+        </button>
     </div>
 </div>
+
+{# ── Print-only header ── #}
+<div class="hidden print-header" style="display:none">
+    <div style="text-align:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-size:18pt; font-weight:bold;">Negros Oriental State University</h2>
+        <h3 style="margin:4px 0; font-size:14pt;">User Directory</h3>
+        <p style="margin:4px 0; font-size:10pt; color:#555;">Printed on: {{ 'now'|date('F d, Y') }}{% if search %} | Search: "{{ search }}"{% endif %}</p>
+        <hr style="margin-top:10px;">
+    </div>
+</div>
+
+{# ── Search Bar ── #}
+<div class="bg-white rounded-xl shadow-sm mb-4">
+    <div class="p-3">
+        <form method="get" action="{{ path('admin_users') }}" class="flex gap-2">
+            {% if roleFilter == 'staff' %}
+                <input type="hidden" name="role" value="staff">
+            {% endif %}
+            <div class="relative flex-1">
+                <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="q" value="{{ search }}" class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Search by name or email...">
+            </div>
+            <button type="submit" class="btn-norsu btn-sm"><i class="bi bi-search mr-1"></i>Search</button>
+            {% if search %}
+                <a href="{{ path('admin_users', roleFilter == 'staff' ? {role: 'staff'} : {}) }}" class="bg-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm hover:bg-gray-300 transition">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{# ── Users Table ── #}
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase tracking-wider">
+                    <th class="px-4 py-3 text-left font-semibold">User</th>
+                    <th class="px-4 py-3 text-left font-semibold">Role</th>
+                    <th class="px-4 py-3 text-left font-semibold">Status</th>
+                    <th class="px-4 py-3 text-left font-semibold">Registered</th>
+                    <th class="px-4 py-3 text-left font-semibold">Last Login</th>
+                    <th class="px-4 py-3 text-right font-semibold no-print">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for user in users %}
+                <tr class="hover:bg-gray-50 transition {{ user.accountStatus == 'pending' ? 'bg-amber-50' : '' }}">
+                    {# ── User info (name + email combined) ── #}
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0
+                                {% if 'ROLE_ADMIN' in user.roles %} bg-gradient-to-br from-red-500 to-red-700
+                                {% elseif 'ROLE_STAFF' in user.roles %} bg-gradient-to-br from-blue-500 to-blue-700
+                                {% else %} bg-gradient-to-br from-emerald-500 to-teal-700{% endif %}">
+                                {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800 mb-0 leading-tight">{{ user.fullName }}</p>
+                                <p class="text-gray-500 text-xs mb-0">{{ user.email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    {# ── Role ── #}
+                    <td class="px-4 py-3">
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="bi bi-shield-fill text-[10px]"></i>Admin</span>
+                        {% elseif 'ROLE_STAFF' in user.roles %}
+                            <span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="bi bi-person-badge text-[10px]"></i>Staff</span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded-full"><i class="bi bi-mortarboard text-[10px]"></i>Alumni</span>
+                        {% endif %}
+                    </td>
+                    {# ── Status ── #}
+                    <td class="px-4 py-3">
+                        {% if user.accountStatus == 'active' %}
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700"><span class="w-2 h-2 bg-green-500 rounded-full"></span>Active</span>
+                        {% elseif user.accountStatus == 'pending' %}
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-700"><span class="w-2 h-2 bg-amber-500 rounded-full"></span>Pending</span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-gray-500"><span class="w-2 h-2 bg-gray-400 rounded-full"></span>Inactive</span>
+                        {% endif %}
+                    </td>
+                    {# ── Dates ── #}
+                    <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{{ user.dateRegistered|date('M d, Y') }}</td>
+                    <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">{{ user.lastLogin ? user.lastLogin|date('M d, Y H:i') : '—' }}</td>
+                    {# ── Actions ── #}
+                    <td class="px-4 py-3 text-right no-print">
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{{ path('admin_user_edit', {id: user.id}) }}" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition flex items-center justify-center" title="Edit User">
+                                <i class="bi bi-pencil text-sm"></i>
+                            </a>
+                            {% if user.accountStatus == 'pending' %}
+                            <form method="post" action="{{ path('admin_user_approve', {id: user.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ user.id) }}">
+                                <button class="w-8 h-8 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition flex items-center justify-center" title="Approve">
+                                    <i class="bi bi-check-lg text-sm"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form method="post" action="{{ path('admin_user_toggle_status', {id: user.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                                <button class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition flex items-center justify-center" title="{{ user.accountStatus == 'active' ? 'Deactivate' : 'Activate' }}">
+                                    <i class="bi {{ user.accountStatus == 'active' ? 'bi-pause-circle' : 'bi-play-circle' }} text-sm"></i>
+                                </button>
+                            </form>
+                            {% if is_granted('ROLE_SUPER_ADMIN') %}
+                            <form method="post" action="{{ path('admin_user_toggle_admin', {id: user.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('admin' ~ user.id) }}">
+                                <button class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition flex items-center justify-center" title="Toggle Admin Role">
+                                    <i class="bi bi-shield-lock text-sm"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if user != app.user %}
+                            <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}"
+                                  onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                <button class="w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition flex items-center justify-center" title="Delete User">
+                                    <i class="bi bi-trash text-sm"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400"><i class="bi bi-people text-2xl block mb-2"></i>No users found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include '_pagination.html.twig' with {
+    currentPage: currentPage,
+    totalPages: totalPages,
+    route: 'admin_users',
+    routeParams: roleFilter == 'staff'
+        ? (search ? {q: search, role: 'staff'} : {role: 'staff'})
+        : (search ? {q: search} : {})
+} %}
 {% endblock %}

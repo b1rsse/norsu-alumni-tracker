@@ -3,86 +3,84 @@
 {% block title %}My Profile{% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0"><i class="bi bi-person-circle me-2"></i>Administrator Profile</h4>
-    <a href="{{ path('app_profile_edit') }}" class="btn btn-norsu"><i class="bi bi-pencil-square me-1"></i>Edit Profile</a>
+<div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+    <h4 class="font-bold mb-0"><i class="bi bi-person-circle mr-2"></i>{% if 'ROLE_ADMIN' in user.roles %}Administrator{% elseif 'ROLE_STAFF' in user.roles %}Staff{% else %}Alumni{% endif %} Profile</h4>
+    <a href="{{ path('app_profile_edit') }}" class="btn-norsu"><i class="bi bi-pencil-square mr-1"></i>Edit Profile</a>
 </div>
 
-<div class="row g-4">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
     {# ── Profile Card ── #}
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm text-center">
+    <div class="md:col-span-4">
+        <div class="card text-center">
             <div class="card-body py-5">
-                <div class="mx-auto mb-3" style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--norsu-blue),var(--norsu-green));display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:700;color:#fff">
-                    {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
-                </div>
-                <h5 class="fw-bold mb-1">{{ user.fullName }}</h5>
-                <p class="text-muted mb-2">{{ user.email }}</p>
-                {% if 'ROLE_ADMIN' in user.roles %}
-                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i>Administrator</span>
+                {% if user.profileImage %}
+                    <img src="{{ asset('uploads/profile/' ~ user.profileImage) }}" alt="Profile photo" class="mx-auto mb-3 rounded-full object-cover" style="width:90px;height:90px;">
                 {% else %}
-                    <span class="badge bg-primary"><i class="bi bi-person me-1"></i>User</span>
+                    <div class="mx-auto mb-3 rounded-full inline-flex items-center justify-center text-3xl font-bold text-white" style="width:90px;height:90px;background:linear-gradient(135deg,#1E40AF,#059669)">
+                        {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                    </div>
+                {% endif %}
+                <h5 class="font-bold mb-1">{{ user.fullName }}</h5>
+                <p class="text-gray-500 mb-2">{{ user.email }}</p>
+                {% if 'ROLE_ADMIN' in user.roles %}
+                    <span class="badge badge-success"><i class="bi bi-shield-check mr-1"></i>Administrator</span>
+                {% elseif 'ROLE_STAFF' in user.roles %}
+                    <span class="badge badge-info"><i class="bi bi-person-badge mr-1"></i>Staff</span>
+                {% else %}
+                    <span class="badge badge-primary"><i class="bi bi-mortarboard mr-1"></i>Alumni</span>
                 {% endif %}
             </div>
         </div>
     </div>
 
     {# ── Account Details ── #}
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-info-circle me-1"></i> Account Information</div>
+    <div class="md:col-span-8">
+        <div class="card">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-info-circle mr-1"></i> Account Information</div>
             <div class="card-body">
-                <table class="table table-borderless mb-0">
+                <table class="w-full text-sm">
                     <tbody>
                         <tr>
-                            <td class="text-muted" style="width:200px"><i class="bi bi-person me-2"></i>First Name</td>
-                            <td class="fw-semibold">{{ user.firstName }}</td>
+                            <td class="text-gray-500 py-2" style="width:200px"><i class="bi bi-person mr-2"></i>First Name</td>
+                            <td class="font-semibold py-2">{{ user.firstName }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-person me-2"></i>Last Name</td>
-                            <td class="fw-semibold">{{ user.lastName }}</td>
+                            <td class="text-gray-500 py-2"><i class="bi bi-person mr-2"></i>Last Name</td>
+                            <td class="font-semibold py-2">{{ user.lastName }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-envelope me-2"></i>Email Address</td>
-                            <td class="fw-semibold">{{ user.email }}</td>
+                            <td class="text-gray-500 py-2"><i class="bi bi-envelope mr-2"></i>Email Address</td>
+                            <td class="font-semibold py-2">{{ user.email }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-shield me-2"></i>Role</td>
-                            <td>
-                                {% for role in user.roles %}
-                                    {% if role == 'ROLE_ADMIN' %}
-                                        <span class="badge bg-success me-1">Admin</span>
-                                    {% elseif role == 'ROLE_USER' %}
-                                        <span class="badge bg-primary me-1">User</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary me-1">{{ role }}</span>
-                                    {% endif %}
-                                {% endfor %}
+                            <td class="text-gray-500 py-2"><i class="bi bi-shield mr-2"></i>Role</td>
+                            <td class="py-2">
+                                <span class="badge {% if 'ROLE_ADMIN' in user.roles %}badge-danger{% elseif 'ROLE_STAFF' in user.roles %}badge-info{% else %}badge-success{% endif %}">{% if 'ROLE_ADMIN' in user.roles %}Administrator{% elseif 'ROLE_STAFF' in user.roles %}Staff{% else %}Alumni{% endif %}</span>
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-check-circle me-2"></i>Account Status</td>
-                            <td>
+                            <td class="text-gray-500 py-2"><i class="bi bi-check-circle mr-2"></i>Account Status</td>
+                            <td class="py-2">
                                 {% if user.accountStatus == 'active' %}
-                                    <span class="badge bg-success">Active</span>
+                                    <span class="badge badge-success">Active</span>
                                 {% elseif user.accountStatus == 'pending' %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    <span class="badge badge-warning">Pending</span>
                                 {% else %}
-                                    <span class="badge bg-danger">Inactive</span>
+                                    <span class="badge badge-danger">Inactive</span>
                                 {% endif %}
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-calendar-event me-2"></i>Date Registered</td>
-                            <td class="fw-semibold">{{ user.dateRegistered|date('F d, Y \\a\\t h:i A') }}</td>
+                            <td class="text-gray-500 py-2"><i class="bi bi-calendar-event mr-2"></i>Date Registered</td>
+                            <td class="font-semibold py-2">{{ user.dateRegistered|date('F d, Y \\a\\t h:i A') }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted"><i class="bi bi-clock-history me-2"></i>Last Login</td>
-                            <td class="fw-semibold">
+                            <td class="text-gray-500 py-2"><i class="bi bi-clock-history mr-2"></i>Last Login</td>
+                            <td class="font-semibold py-2">
                                 {% if user.lastLogin %}
-                                    {{ user.lastLogin|date('F d, Y \\a\\t h:i A') }}
+                                    <span id="last-login-realtime"></span>
                                 {% else %}
-                                    <span class="text-muted">Never</span>
+                                    <span class="text-gray-400">Never</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -91,16 +89,79 @@
             </div>
         </div>
 
-        {# ── Security Section ── #}
-        <div class="card border-0 shadow-sm mt-3">
-            <div class="card-header bg-white fw-semibold"><i class="bi bi-lock me-1"></i> Security</div>
+        {% if user.lastLogin %}
+        <script>
+            (function() {
+                var el = document.getElementById('last-login-realtime');
+                if (!el) return;
+
+                function formatDate(d) {
+                    var months = ['January','February','March','April','May','June',
+                                  'July','August','September','October','November','December'];
+                    var month = months[d.getMonth()];
+                    var day = String(d.getDate()).padStart(2, '0');
+                    var year = d.getFullYear();
+                    var hours = d.getHours();
+                    var minutes = String(d.getMinutes()).padStart(2, '0');
+                    var seconds = String(d.getSeconds()).padStart(2, '0');
+                    var ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    if (hours === 0) hours = 12;
+                    hours = String(hours).padStart(2, '0');
+                    return month + ' ' + day + ', ' + year + ' at ' + hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+                }
+
+                function tick() {
+                    el.textContent = formatDate(new Date());
+                }
+
+                tick();
+                setInterval(tick, 1000);
+            })();
+        </script>
+        {% endif %}
+
+        {# ── Security ── #}
+        <div class="card mt-3">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-lock mr-1"></i> Security</div>
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="flex justify-between items-center">
                     <div>
-                        <p class="mb-1 fw-semibold">Password</p>
-                        <p class="text-muted mb-0 small">Last changed at registration. Update your password regularly for security.</p>
+                        <p class="mb-1 font-semibold">Password</p>
+                        <p class="text-gray-500 mb-0 text-sm">Last changed at registration. Update your password regularly for security.</p>
                     </div>
-                    <a href="{{ path('app_profile_edit') }}" class="btn btn-outline-norsu btn-sm"><i class="bi bi-key me-1"></i>Change Password</a>
+                    <a href="{{ path('app_profile_edit') }}" class="btn-outline-norsu btn-sm"><i class="bi bi-key mr-1"></i>Change Password</a>
+                </div>
+            </div>
+        </div>
+
+        {# ── Data Privacy (DPA Compliance) ── #}
+        <div class="card mt-3">
+            <div class="card-header bg-white font-semibold"><i class="bi bi-shield-lock mr-1"></i> Data Privacy</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600 mb-2">
+                        In compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>, you have the right to access, correct, and request erasure of your personal data.
+                    </p>
+                    {% if user.dpaConsent %}
+                        <p class="text-sm text-green-700"><i class="bi bi-check-circle mr-1"></i>DPA Consent given on {{ user.dpaConsentDate ? user.dpaConsentDate|date('F d, Y') : 'N/A' }}</p>
+                    {% else %}
+                        <p class="text-sm text-amber-600"><i class="bi bi-exclamation-triangle mr-1"></i>No DPA consent on record.</p>
+                    {% endif %}
+                </div>
+                <hr class="my-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="mb-1 font-semibold text-red-700">Request Data Erasure</p>
+                        <p class="text-gray-500 mb-0 text-sm">This will permanently anonymize your account and data. This action cannot be undone.</p>
+                    </div>
+                    <form method="post" action="{{ path('app_profile_erase') }}"
+                          onsubmit="return confirm('Are you sure you want to erase all your personal data? This action is PERMANENT and cannot be undone. You will be logged out immediately.')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('erase_data') }}">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+                            <i class="bi bi-trash mr-1"></i>Erase My Data
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

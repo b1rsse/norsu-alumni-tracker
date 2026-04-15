@@ -17,7 +17,7 @@ class FeedbackType extends AbstractType
             ->add('suggestions', TextareaType::class, [
                 'label' => 'Suggestions for the University',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'rows' => 4, 'placeholder' => 'Share your thoughts on how the university can improve...'],
+                'attr' => ['class' => 'form-input', 'rows' => 4, 'placeholder' => 'Share your thoughts on how the university can improve...'],
             ])
             ->add('recommendUniversity', CheckboxType::class, [
                 'label' => 'I would recommend NORSU to prospective students',

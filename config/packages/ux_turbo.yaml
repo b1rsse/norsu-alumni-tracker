@@ -1,4 +1,4 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Keep CSRF stateful for login/forms to avoid token mismatch loops.
 framework:
     csrf_protection:
-        check_header: true
+        check_header: false

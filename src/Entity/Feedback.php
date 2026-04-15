@@ -14,7 +14,7 @@ class Feedback
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Alumni::class, inversedBy: 'feedbacks')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Alumni $alumni = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

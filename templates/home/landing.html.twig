@@ -3,67 +3,46 @@
 {% block title %}NORSU Alumni Tracker — Welcome{% endblock %}
 
 {% block body %}
-<div class="hero-section">
-    <div class="container text-center">
-        <div class="mb-3">
-            <span style="background:rgba(255,255,255,0.15);border-radius:50%;padding:0.5rem;display:inline-flex;align-items:center;justify-content:center">
-                <img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU Logo" style="width:60px;height:60px;border-radius:50%;object-fit:cover">
+<div class="hero-section relative overflow-hidden text-white py-20 mb-8" style="background-color:#1E3A8A;background-image:linear-gradient(118deg,rgba(6,24,63,0.84) 0%,rgba(13,65,120,0.66) 48%,rgba(5,150,105,0.54) 100%),url('{{ asset('images/home-hero-graduation.png') }}');background-size:cover;background-position:center;background-repeat:no-repeat;">
+    <div class="max-w-4xl mx-auto text-center px-4 relative z-10" style="padding-top:2rem;">
+        <div class="mb-4">
+            <span class="inline-flex items-center justify-center gap-2">
+                <img src="{{ asset('images/norsu-seal.webp') }}" alt="NORSU Seal" class="object-contain shadow-sm" style="width:56px;height:56px;">
+                <img src="{{ asset('images/norsu-navbar-logo.webp') }}" alt="NORSU Alumni Logo" class="object-contain shadow-md" style="width:60px;height:60px;">
             </span>
         </div>
-        <h1 style="font-weight:800;font-size:2.75rem">NORSU Alumni Tracker</h1>
-        <p class="lead mb-4" style="max-width:600px;margin:0 auto">Connecting Negros Oriental State University graduates — track careers, build networks, and stay in touch.</p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
-            <a href="{{ path('app_register') }}" class="btn btn-light btn-lg fw-semibold px-4"><i class="bi bi-person-plus me-2"></i>Get Started</a>
-            <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-lg fw-semibold px-4"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</a>
+        <h1 class="font-extrabold text-4xl md:text-5xl mb-4">NORSU Alumni Tracker</h1>
+        <p class="text-lg md:text-xl mb-6 max-w-[600px] mx-auto text-white/90">Connecting Negros Oriental State University graduates — track careers, build networks, and stay in touch.</p>
+        <div class="flex gap-3 justify-center flex-wrap mt-6">
+            <a href="{{ path('app_register') }}" class="bg-white text-gray-800 hover:bg-gray-100 font-semibold px-6 py-3 rounded-lg text-base no-underline transition-colors inline-flex items-center gap-2"><i class="bi bi-mortarboard-fill"></i>Register as Alumni</a>
+            <a href="{{ path('app_login') }}" class="border-2 border-white text-white hover:bg-white/10 font-semibold px-6 py-3 rounded-lg text-base no-underline transition-colors inline-flex items-center gap-2"><i class="bi bi-box-arrow-in-right"></i>Sign In</a>
         </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="text-center mb-4">
-        <h3 class="fw-bold">What We Offer</h3>
-        <p class="text-muted">Empowering NORSU through alumni engagement and data-driven insights</p>
+<div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-6">
+        <h3 class="font-bold text-2xl">What We Offer</h3>
+        <p class="text-gray-500">Empowering NORSU through alumni engagement and data-driven insights</p>
     </div>
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #1E40AF !important">
-                <div class="mb-3"><i class="bi bi-people-fill" style="font-size:3rem;color:#1E40AF"></i></div>
-                <h5 class="fw-bold">Alumni Directory</h5>
-                <p class="text-muted mb-0">Browse and search through our comprehensive database of NORSU graduates across all courses and batch years.</p>
-            </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="card h-full text-center p-8 border-t-[3px] border-blue-700">
+            <div class="mb-4"><i class="bi bi-people-fill text-blue-700 text-5xl"></i></div>
+            <h5 class="font-bold text-lg mb-2">Alumni Directory</h5>
+            <p class="text-gray-500 mb-0 text-sm">Browse and search through our comprehensive database of NORSU graduates across all courses and batch years.</p>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #059669 !important">
-                <div class="mb-3"><i class="bi bi-briefcase-fill" style="font-size:3rem;color:#059669"></i></div>
-                <h5 class="fw-bold">Career Tracking</h5>
-                <p class="text-muted mb-0">Monitor employment status, work history, and career progression of alumni to gain valuable insights.</p>
-            </div>
+        <div class="card h-full text-center p-8 border-t-[3px] border-emerald-600">
+            <div class="mb-4"><i class="bi bi-briefcase-fill text-emerald-600 text-5xl"></i></div>
+            <h5 class="font-bold text-lg mb-2">Career Tracking</h5>
+            <p class="text-gray-500 mb-0 text-sm">Monitor employment status, work history, and career progression of alumni to gain valuable insights.</p>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center p-4 border-0" style="border-top:3px solid #06B6D4 !important">
-                <div class="mb-3"><i class="bi bi-graph-up-arrow" style="font-size:3rem;color:#06B6D4"></i></div>
-                <h5 class="fw-bold">Data Insights</h5>
-                <p class="text-muted mb-0">Analyze trends in employment, skills, and salary ranges to help the university improve its programs.</p>
-            </div>
+        <div class="card h-full text-center p-8 border-t-[3px] border-cyan-500">
+            <div class="mb-4"><i class="bi bi-graph-up-arrow text-cyan-500 text-5xl"></i></div>
+            <h5 class="font-bold text-lg mb-2">Data Insights</h5>
+            <p class="text-gray-500 mb-0 text-sm">Analyze trends in employment, skills, and salary ranges to help the university improve its programs.</p>
         </div>
     </div>
 </div>
 
-<footer class="footer-norsu">
-    <div class="container">
-        <div class="d-md-flex justify-content-between align-items-center text-center text-md-start">
-            <div>
-                <div class="footer-brand"><img src="{{ asset('images/norsu-logo.webp') }}" alt="NORSU" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle" class="me-2">NORSU Alumni Tracker</div>
-                <p class="mb-0 small">Negros Oriental State University, Dumaguete City</p>
-            </div>
-            <div class="footer-social mt-3 mt-md-0">
-                <a href="#"><i class="bi bi-facebook"></i></a>
-                <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                <a href="#"><i class="bi bi-globe2"></i></a>
-            </div>
-        </div>
-        <div class="footer-divider"></div>
-        <p class="text-center mb-0" style="font-size:0.8rem">&copy; {{ 'now'|date('Y') }} NORSU Alumni Tracker. All rights reserved.</p>
-    </div>
-</footer>
+{% include 'home/_public_footer.html.twig' %}
 {% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Job Board{% endblock %}
+
+{% block body %}
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+    <div>
+        <h4 class="font-bold mb-0"><i class="bi bi-briefcase-fill mr-2"></i>Job Board</h4>
+        <p class="text-gray-500 text-sm mb-0">Browse job opportunities posted for NORSU alumni</p>
+    </div>
+    <div class="flex items-center gap-2 no-print">
+        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition">
+            <i class="bi bi-printer"></i>Print
+        </button>
+        {% if is_granted('ROLE_STAFF') %}
+            <a href="{{ path('job_board_manage') }}" class="btn-outline-norsu btn-sm"><i class="bi bi-gear mr-1"></i>Manage</a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Print-only header ── #}
+<div class="hidden print-header" style="display:none">
+    <div style="text-align:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-size:18pt; font-weight:bold;">Negros Oriental State University</h2>
+        <h3 style="margin:4px 0; font-size:14pt;">Job Board Listings</h3>
+        <p style="margin:4px 0; font-size:10pt; color:#555;">Printed on: {{ 'now'|date('F d, Y') }}</p>
+        <hr style="margin-top:10px;">
+    </div>
+</div>
+
+{# Filters #}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div class="md:col-span-4">
+                <label class="form-label text-xs uppercase text-gray-500">Search</label>
+                <input type="text" name="q" value="{{ app.request.query.get('q') }}" class="form-input" placeholder="Job title, company…">
+            </div>
+            <div class="md:col-span-3">
+                <label class="form-label text-xs uppercase text-gray-500">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    {% for t in ['Full-time','Part-time','Contract','Freelance','Internship'] %}
+                        <option value="{{ t }}" {{ app.request.query.get('type') == t ? 'selected' : '' }}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <label class="form-label text-xs uppercase text-gray-500">Course</label>
+                <select name="course" class="form-select">
+                    <option value="">All Courses</option>
+                    {% for c in courses|default([]) %}
+                        <option value="{{ c }}" {{ app.request.query.get('course') == c ? 'selected' : '' }}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="btn-norsu w-full"><i class="bi bi-search mr-1"></i>Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if jobs|length == 0 %}
+    <div class="card"><div class="card-body text-center text-gray-500 py-10">
+        <i class="bi bi-briefcase text-4xl block mb-2 opacity-25"></i>
+        No job postings found.
+    </div></div>
+{% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for job in jobs %}
+        <div class="card h-full flex flex-col">
+            <div class="card-body flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h6 class="font-bold mb-0">{{ job.title }}</h6>
+                    <span class="badge badge-info shrink-0 ml-2">{{ job.employmentType }}</span>
+                </div>
+                <div class="text-sm text-gray-500 space-y-0.5 mb-2">
+                    <div><i class="bi bi-building mr-1"></i>{{ job.companyName }}</div>
+                    {% if job.location %}<div><i class="bi bi-geo-alt mr-1"></i>{{ job.location }}</div>{% endif %}
+                    {% if job.salaryRange %}<div><i class="bi bi-cash mr-1"></i>{{ job.salaryRange }}</div>{% endif %}
+                    {% if job.relatedCourse %}<div><i class="bi bi-mortarboard mr-1"></i>{{ job.relatedCourse }}</div>{% endif %}
+                </div>
+                <p class="text-sm text-gray-500">{{ job.description|length > 120 ? job.description|slice(0,120) ~ '…' : job.description }}</p>
+            </div>
+            <div class="card-footer bg-white flex justify-between items-center">
+                <div class="text-xs text-gray-500">
+                    <div>{{ job.datePosted|date('M d, Y') }}</div>
+                    {% if job.deadline %}
+                        <div class="{{ job.deadline < date() ? 'text-red-500' : '' }}">Deadline: {{ job.deadline|date('M d, Y') }}</div>
+                    {% endif %}
+                </div>
+                <a href="{{ path('job_board_show', {id: job.id}) }}" class="btn-outline-norsu btn-sm">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
